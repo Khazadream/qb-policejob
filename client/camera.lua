@@ -83,6 +83,7 @@ end
 -- Events
 RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
     if Config.SecurityCameras.cameras[cameraId] then
+        FreezeEntityPosition(GetPlayerPed(PlayerId()), true)
         DoScreenFadeOut(250)
         while not IsScreenFadedOut() do
             Wait(0)
@@ -167,6 +168,7 @@ CreateThread(function()
                     type = 'disablecam',
                 })
                 DoScreenFadeIn(250)
+                FreezeEntityPosition(GetPlayerPed(PlayerId()), false)
             end
 
             ---------------------------------------------------------------------------
