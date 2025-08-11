@@ -24,7 +24,8 @@ client_scripts {
 	'client/anpr.lua',
 	'client/evidence.lua',
 	'client/objects.lua',
-	'client/tracker.lua'
+	'client/tracker.lua',
+	'cl_khaza/shop.lua'
 }
 
 server_scripts {
@@ -35,6 +36,7 @@ server_scripts {
 	'server/evidence.lua',
 	'server/objects.lua',
 	'server/vehicle.lua',
+	'sv_khaza/shop.lua'
 }
 
 ui_page 'html/index.html'
