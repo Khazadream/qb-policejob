@@ -14,6 +14,10 @@ local function GetCurrentTime()
 end
 
 local function ChangeSecurityCamera(x, y, z, r)
+    if Config.useEvangeCore then
+        exports['evange-core']:StopAll()
+    end
+
     if createdCamera ~= 0 then
         DestroyCam(createdCamera, 0)
         createdCamera = 0
@@ -23,6 +27,26 @@ local function ChangeSecurityCamera(x, y, z, r)
     SetCamCoord(cam, x, y, z)
     SetCamRot(cam, r.x, r.y, r.z, 2)
     RenderScriptCams(1, 0, 0, 1, 1)
+
+    if Config.useEvangeCore then
+        local playerPed = PlayerPedId()
+        local x, y, z = table.unpack(GetEntityCoords(playerPed))
+
+        local streetHash, crossingHash = GetStreetNameAtCoord(x, y, z)
+        local streetName = GetStreetNameFromHashKey(streetHash)
+        local crossingName = GetStreetNameFromHashKey(crossingHash)
+
+        local year, month, day, hour, minute, second = GetLocalTime()
+        local localTime = day..'/'..month..'/'..year..'  '..hour..':'..minute..':'..second
+        local camName = 'CAM#'..rand
+        TriggerEvent('set-hud-visible', false)
+        exports['evange-core']:OpenCameraHUD({
+            cameraName = camName,
+            locationName = streetName..' '..crossingName,
+            startDate = localTime,
+        })
+    end
+
     Wait(250)
     createdCamera = cam
 end
@@ -36,6 +60,12 @@ local function CloseSecurityCamera()
     if Config.SecurityCameras.hideradar then
         DisplayRadar(true)
     end
+
+    if Config.useEvangeCore then
+        exports['evange-core']:StopAll()
+        TriggerEvent('set-hud-visible', true)
+    end
+
     FreezeEntityPosition(GetPlayerPed(PlayerId()), false)
 end
 

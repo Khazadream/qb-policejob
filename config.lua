@@ -8,6 +8,8 @@ Config.WhitelistedVehicles = {}
 Config.PoliceHelicopter = 'POLMAV'
 Config.FuelResource = 'LegacyFuel' -- supports any that has a GetFuel() and SetFuel() export
 
+Config.useEvangeCore = false
+
 Config.AmmoLabels = {
     AMMO_PISTOL = '9x19mm parabellum bullet',
     AMMO_SMG = '9x19mm parabellum bullet',
