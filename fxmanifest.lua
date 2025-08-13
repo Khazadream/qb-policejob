@@ -26,7 +26,8 @@ client_scripts {
 	'client/objects.lua',
 	'client/tracker.lua',
 	'cl_khaza/shop.lua',
-	'cl_khaza/surveillance.lua'
+	'cl_khaza/surveillance.lua',
+	'cl_khaza/spikes.lua'
 }
 
 server_scripts {
@@ -37,7 +38,8 @@ server_scripts {
 	'server/evidence.lua',
 	'server/objects.lua',
 	'server/vehicle.lua',
-	'sv_khaza/shop.lua'
+	'sv_khaza/shop.lua',
+	'sv_khaza/spikes.lua'
 }
 
 ui_page 'html/index.html'

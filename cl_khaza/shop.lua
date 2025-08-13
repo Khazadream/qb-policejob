@@ -49,7 +49,6 @@ local function CloseShop()
     exports['ox_inventory']:closeInventory()
 end
 
-
 -- Create event to open shop
 RegisterNetEvent('qb-policejob:client:OpenShop', function()
     OpenShop()
@@ -61,8 +60,16 @@ AddEventHandler('onResourceStart', function(resourceName)
     end
 end)
 
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+    SpawnShopPed()
+end)
+
 AddEventHandler('onResourceStop', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
         DeleteShopPed()
     end
+end)
+
+RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    DeleteShopPed()
 end)
