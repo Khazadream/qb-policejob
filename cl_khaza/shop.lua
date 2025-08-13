@@ -4,8 +4,14 @@ local model = 's_m_y_cop_01'
 -- set config
 local ShopConfig = {
     Shop = {
-        coords = vector3(443.11, -987.32, 29.69),
-        heading = 268.86,
+        coords = vector3(-403.23, -379.15, 24.1),
+        heading = 354.92,
+        zoneCoords = vector3(-403.13, -378.27, 25.1),
+        length = 0.8,
+        height = 1.4,
+        zoneHeading = 350,
+        minZ = 24.7,
+        maxZ = 26.1,
     },
 }
 
@@ -18,9 +24,29 @@ local function SpawnShopPed()
     shopPed = CreatePed(0, model, ShopConfig.Shop.coords, ShopConfig.Shop.heading, false, false)
     SetEntityHeading(shopPed, ShopConfig.Shop.heading)
     FreezeEntityPosition(shopPed, true)
+    SetBlockingOfNonTemporaryEvents(shopPed, true)
+    SetEntityInvincible(shopPed, true)
 
     -- Create interaction on shopPed to open shop using qb-target
     exports['qb-target']:AddTargetEntity(shopPed, {
+        options = {
+            {
+                type = 'client',
+                event = 'qb-policejob:client:OpenShop',
+                icon = 'fas fa-store',
+                label = 'Open Shop',
+                job = 'police',
+            },
+        },
+        distance = 2.0,
+    })
+    exports['qb-target']:AddBoxZone("shop_zone", ShopConfig.Shop.zoneCoords, ShopConfig.Shop.length, ShopConfig.Shop.height, {
+        name = "shop_zone",
+        heading = ShopConfig.Shop.zoneHeading,
+        debugPoly = Config.debugZone,
+        minZ = ShopConfig.Shop.minZ,
+        maxZ = ShopConfig.Shop.maxZ,
+    }, {
         options = {
             {
                 type = 'client',
@@ -37,6 +63,7 @@ end
 -- Delete Shop Ped
 local function DeleteShopPed()
     DeletePed(shopPed)
+    exports['qb-target']:RemoveZone("shop_zone")
 end
 
 -- Create a function to open ox inventory shop

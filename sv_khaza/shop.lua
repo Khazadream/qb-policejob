@@ -7,6 +7,7 @@ local function RegisterOxShop()
             { name = 'testplaceable', price = 100, metadata = {label = 'Barrière', propName = 'prop_barrier_work06a'} },
             { name = 'testplaceable', price = 100, metadata = {label = 'Barrière', propName = 'prop_mp_barrier_02b'} },
             { name = 'testplaceable', price = 100, metadata = {label = 'Barrière', propName = 'xm3_prop_xm3_road_barrier_01a'} },
+            { name = 'spikes', price = 10},
         },
     })
 end
