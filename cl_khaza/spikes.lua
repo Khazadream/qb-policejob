@@ -4,17 +4,29 @@ end)
 
 local model = `P_ld_stinger_s`
 
-exports['qb-target']:AddTargetModel(model, {
-    options = {
-      {
-        num = 1,
-        icon = "fas fa-credit-card",
-        label = "Remove spikes",
-        action = function(entity)
-          TriggerEvent("qb-policejob:client:removePlacedSpikes", entity)
-        end,
-        job = "police"
-      }
-    },
-    distance = 1.5
-})
+local function CreateTargetOnSpikesModel()
+  exports['qb-target']:AddTargetModel(model, {
+      options = {
+        {
+          num = 1,
+          icon = "fas fa-credit-card",
+          label = "Remove spikes",
+          action = function(entity)
+            TriggerEvent("qb-policejob:client:removePlacedSpikes", entity)
+          end,
+          job = "police"
+        }
+      },
+      distance = 2.5
+  })
+end
+
+AddEventHandler('onResourceStart', function(resourceName)
+  if GetCurrentResourceName() == resourceName then
+      CreateTargetOnSpikesModel()
+  end
+end)
+
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+  CreateTargetOnSpikesModel()
+end)
