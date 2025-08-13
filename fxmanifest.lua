@@ -25,7 +25,8 @@ client_scripts {
 	'client/evidence.lua',
 	'client/objects.lua',
 	'client/tracker.lua',
-	'cl_khaza/shop.lua'
+	'cl_khaza/shop.lua',
+	'cl_khaza/surveillance.lua'
 }
 
 server_scripts {

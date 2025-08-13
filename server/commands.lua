@@ -304,7 +304,7 @@ QBCore.Commands.Add('cam', Lang:t('commands.camera'), { { name = 'camid', help =
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
-end)
+end, 'god')
 
 QBCore.Commands.Add('paytow', Lang:t('commands.paytow'), { { name = 'id', help = Lang:t('info.player_id') } }, true, function(source, args)
     local src = source
