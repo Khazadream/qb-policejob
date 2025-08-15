@@ -1,5 +1,4 @@
 -- Variables
-local ObjectList = {}
 local SpawnedSpikes = {}
 local spikemodel = `P_ld_stinger_s`
 local ClosestSpike = nil

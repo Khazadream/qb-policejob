@@ -65,39 +65,6 @@ QBCore.Commands.Add('takedrivinglicense', Lang:t('commands.drivinglicense'), {},
     end
 end)
 
--- Objects
-
-QBCore.Commands.Add('spikestrip', Lang:t('commands.place_spike'), {}, false, function(source)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if Player.PlayerData.job.type == 'leo' and Player.PlayerData.job.onduty then
-        TriggerClientEvent('police:client:SpawnSpikeStrip', src)
-    end
-end)
-
-QBCore.Commands.Add('pobject', Lang:t('commands.place_object'), { { name = 'type', help = Lang:t('info.poobject_object') } }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    local type = args[1]:lower()
-    if Player.PlayerData.job.type == 'leo' and Player.PlayerData.job.onduty then
-        if type == 'cone' then
-            TriggerClientEvent('police:client:spawnCone', src)
-        elseif type == 'barrier' then
-            TriggerClientEvent('police:client:spawnBarrier', src)
-        elseif type == 'roadsign' then
-            TriggerClientEvent('police:client:spawnRoadSign', src)
-        elseif type == 'tent' then
-            TriggerClientEvent('police:client:spawnTent', src)
-        elseif type == 'light' then
-            TriggerClientEvent('police:client:spawnLight', src)
-        elseif type == 'delete' then
-            TriggerClientEvent('police:client:deleteObject', src)
-        end
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
-    end
-end)
-
 -- Interaction
 
 QBCore.Commands.Add('cuff', Lang:t('commands.cuff_player'), {}, false, function(source)
