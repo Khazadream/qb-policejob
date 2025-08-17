@@ -53,3 +53,8 @@ files {
 	'html/main.css',
 	'html/vcr-ocd.ttf'
 }
+
+dependencies {
+	'ox_lib',
+	'ox_inventory'
+}

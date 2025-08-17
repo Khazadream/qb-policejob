@@ -118,23 +118,6 @@ RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId,
     end
 end)
 
-RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if not Player then return end
-    local casingId = CreateCasingId()
-    local weaponInfo = QBCore.Shared.Weapons[weapon]
-    local serieNumber = nil
-    if weaponInfo then
-        local weaponItem = Player.Functions.GetItemByName(weaponInfo['name'])
-        if weaponItem then
-            if weaponItem.info and weaponItem.info ~= '' then
-                serieNumber = weaponItem.info.serie
-            end
-        end
-    end
-    TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weapon, coords, serieNumber)
-end)
 
 RegisterNetEvent('evidence:server:ClearCasings', function(casingList)
     if casingList and next(casingList) then
@@ -156,4 +139,45 @@ RegisterNetEvent('evidence:server:AddCasingToInventory', function(casingId, casi
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.have_evidence_bag'), 'error')
     end
+end)
+
+-- QBCore Original Function
+-- RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
+--     local src = source
+--     local Player = QBCore.Functions.GetPlayer(src)
+--     if not Player then return end
+--     local casingId = CreateCasingId()
+--     local weaponInfo = QBCore.Shared.Weapons[weapon]
+--     local serieNumber = nil
+--     if weaponInfo then
+--         local weaponItem = Player.Functions.GetItemByName(weaponInfo['name'])
+--         if weaponItem then
+--             if weaponItem.info and weaponItem.info ~= '' then
+--                 serieNumber = weaponItem.info.serie
+--             end
+--         end
+--     end
+--     TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weapon, coords, serieNumber)
+-- end)
+
+-- New Function
+RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    local inventory = exports.ox_inventory:GetInventoryItems(src)
+    local weaponName, serialNumber = nil, nil
+
+    for _, item in pairs(inventory) do
+        if item.name and joaat(item.name) == weapon then
+            weaponName = item.name
+            serialNumber = item.metadata and item.metadata.serial or nil
+            break
+        end
+    end
+    if not weaponName then return end
+
+    local casingId = CreateCasingId()
+    TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weaponName, coords, serialNumber)
 end)

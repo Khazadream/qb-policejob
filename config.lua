@@ -60,9 +60,9 @@ Config.Locations = {
         vector3(455.1456, -985.462, 30.689),
     },
     stations = {
-        { label = 'Police Station',        coords = vector4(428.23, -984.28, 29.76, 3.5) },
-        { label = 'Prison',                coords = vector4(1845.903, 2585.873, 45.672, 272.249) },
-        { label = 'Police Station Paleto', coords = vector4(-451.55, 6014.25, 31.716, 223.81) },
+        { label = 'Police Station',        coords = vector4(-364.41, -356.07, 31.58, 71.03) },
+        -- { label = 'Prison',                coords = vector4(1845.903, 2585.873, 45.672, 272.249) },
+        -- { label = 'Police Station Paleto', coords = vector4(-451.55, 6014.25, 31.716, 223.81) },
     },
 }
 

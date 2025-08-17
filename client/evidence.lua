@@ -158,6 +158,7 @@ RegisterNetEvent('evidence:client:AddCasing', function(casingId, weapon, coords,
             z = coords.z - 0.9
         }
     }
+    print('casingId', casingId, 'added')
 end)
 
 RegisterNetEvent('evidence:client:RemoveCasing', function(casingId)
@@ -310,12 +311,29 @@ CreateThread(function()
     end
 end)
 
+local function CheckIfPlayerHasUVLight()
+    local items = exports.ox_inventory:GetPlayerItems()
+
+    for _, item in pairs(items) do
+        if item.name == 'WEAPON_POCKETLIGHT' and item.metadata and item.metadata.components then
+            for _, comp in ipairs(item.metadata.components) do
+                if comp == 'plight_uv' then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+
 CreateThread(function()
     while true do
         Wait(10)
         if LocalPlayer.state.isLoggedIn then
             if PlayerJob.type == 'leo' and PlayerJob.onduty then
-                if IsPlayerFreeAiming(PlayerId()) and GetSelectedPedWeapon(PlayerPedId()) == `WEAPON_FLASHLIGHT` then
+                if IsPlayerFreeAiming(PlayerId()) and GetSelectedPedWeapon(PlayerPedId()) == `WEAPON_POCKETLIGHT` and CheckIfPlayerHasUVLight() then
+
                     if next(Casings) then
                         local pos = GetEntityCoords(PlayerPedId(), true)
                         for k, v in pairs(Casings) do
