@@ -13,7 +13,7 @@ local function GetCurrentTime()
     return tostring(hours .. ':' .. minutes)
 end
 
-local function ChangeSecurityCamera(x, y, z, r)
+local function ChangeSecurityCamera(x, y, z, r, cameraId)
     if Config.useEvangeCore then
         exports['evange-core']:StopAll()
     end
@@ -38,13 +38,16 @@ local function ChangeSecurityCamera(x, y, z, r)
 
         local year, month, day, hour, minute, second = GetLocalTime()
         local localTime = day..'/'..month..'/'..year..'  '..hour..':'..minute..':'..second
-        local camName = 'CAM#'..rand
+        local camName = 'CAM#'.. cameraId
         TriggerEvent('set-hud-visible', false)
-        exports['evange-core']:OpenCameraHUD({
-            cameraName = camName,
-            locationName = streetName..' '..crossingName,
-            startDate = localTime,
-        })
+        CreateThread(function()
+            Wait(500)
+            exports['evange-core']:OpenCameraHUD({
+                cameraName = camName,
+                locationName = streetName..' '..crossingName,
+                startDate = localTime,
+            })
+        end)
     end
 
     Wait(250)
@@ -118,19 +121,19 @@ RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
         while not IsScreenFadedOut() do
             Wait(0)
         end
-        SendNUIMessage({
-            type = 'enablecam',
-            label = Config.SecurityCameras.cameras[cameraId].label,
-            id = cameraId,
-            connected = Config.SecurityCameras.cameras[cameraId].isOnline,
-            time = GetCurrentTime(),
-        })
+        -- SendNUIMessage({
+        --     type = 'enablecam',
+        --     label = Config.SecurityCameras.cameras[cameraId].label,
+        --     id = cameraId,
+        --     connected = Config.SecurityCameras.cameras[cameraId].isOnline,
+        --     time = GetCurrentTime(),
+        -- })
         local firstCamx = Config.SecurityCameras.cameras[cameraId].coords.x
         local firstCamy = Config.SecurityCameras.cameras[cameraId].coords.y
         local firstCamz = Config.SecurityCameras.cameras[cameraId].coords.z
         local firstCamr = Config.SecurityCameras.cameras[cameraId].r
         SetFocusArea(firstCamx, firstCamy, firstCamz, firstCamx, firstCamy, firstCamz)
-        ChangeSecurityCamera(firstCamx, firstCamy, firstCamz, firstCamr)
+        ChangeSecurityCamera(firstCamx, firstCamy, firstCamz, firstCamr, cameraId)
         currentCameraIndex = cameraId
         DoScreenFadeIn(250)
     elseif cameraId == 0 then

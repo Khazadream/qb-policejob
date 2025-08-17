@@ -1,4 +1,5 @@
 local Casings = {}
+local Bullets = {}
 local BloodDrops = {}
 local FingerDrops = {}
 local PlayerStatus = {}
@@ -41,6 +42,19 @@ local function CreateCasingId()
     else
         local caseId = math.random(10000, 99999)
         return caseId
+    end
+end
+
+local function CreateBulletId()
+    if Bullets then
+        local bulletId = math.random(10000, 99999)
+        while Bullets[bulletId] do
+            bulletId = math.random(10000, 99999)
+        end
+        return bulletId
+    else
+        local bulletId = math.random(10000, 99999)
+        return bulletId
     end
 end
 
@@ -92,30 +106,40 @@ RegisterNetEvent('evidence:server:ClearBlooddrops', function(blooddropList)
     end
 end)
 
+-- BLOODDROP -> filled evidence bag (ox_inventory)
 RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bloodInfo)
     local src = source
-    if exports['qb-inventory']:RemoveItem(src, 'empty_evidence_bag', 1, false, 'evidence:server:AddBlooddropToInventory') then
-        if exports['qb-inventory']:AddItem(src, 'filled_evidence_bag', 1, false, bloodInfo, 'evidence:server:AddBlooddropToInventory') then
-            TriggerClientEvent('qb-inventory:client:ItemBox', src, QBCore.Shared.Items['filled_evidence_bag'], 'add')
-            TriggerClientEvent('evidence:client:RemoveBlooddrop', -1, bloodId)
-            BloodDrops[bloodId] = nil
-        end
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.have_evidence_bag'), 'error')
+    local metadata = {
+        _type = 'blood',
+        info = bloodInfo,
+        label = 'Sachet de sang',
+    }
+
+    if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
+        return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.have_evidence_bag'), 'error')
     end
+
+    exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata)
+    TriggerClientEvent('evidence:client:RemoveBlooddrop', -1, bloodId)
+    BloodDrops[bloodId] = nil
 end)
 
+-- FINGERPRINT -> filled evidence bag (ox_inventory)
 RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId, fingerInfo)
     local src = source
-    if exports['qb-inventory']:RemoveItem(src, 'empty_evidence_bag', 1, false, 'evidence:server:AddFingerprintToInventory') then
-        if exports['qb-inventory']:AddItem(src, 'filled_evidence_bag', 1, false, fingerInfo, 'evidence:server:AddFingerprintToInventory') then
-            TriggerClientEvent('qb-inventory:client:ItemBox', src, QBCore.Shared.Items['filled_evidence_bag'], 'add')
-            TriggerClientEvent('evidence:client:RemoveFingerprint', -1, fingerId)
-            FingerDrops[fingerId] = nil
-        end
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.have_evidence_bag'), 'error')
+    local metadata = {
+        _type = 'fingerprint',
+        info = fingerInfo,
+        label = 'Empreinte digitale',
+    }
+
+    if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
+        return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.have_evidence_bag'), 'error')
     end
+
+    exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata)
+    TriggerClientEvent('evidence:client:RemoveFingerprint', -1, fingerId)
+    FingerDrops[fingerId] = nil
 end)
 
 
@@ -130,54 +154,72 @@ end)
 
 RegisterNetEvent('evidence:server:AddCasingToInventory', function(casingId, casingInfo)
     local src = source
-    if exports['qb-inventory']:RemoveItem(src, 'empty_evidence_bag', 1, false, 'evidence:server:AddCasingToInventory') then
-        if exports['qb-inventory']:AddItem(src, 'filled_evidence_bag', 1, false, casingInfo, 'evidence:server:AddCasingToInventory') then
-            TriggerClientEvent('qb-inventory:client:ItemBox', src, QBCore.Shared.Items['filled_evidence_bag'], 'add')
-            TriggerClientEvent('evidence:client:RemoveCasing', -1, casingId)
-            Casings[casingId] = nil
-        end
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.have_evidence_bag'), 'error')
+    local metadata = {
+        _type = 'casing',
+        info = casingInfo,
+        label = 'Sachet de douille',
+    }
+    if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
+        return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.have_evidence_bag'), 'error')
     end
+    exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata)
+    TriggerClientEvent('evidence:client:RemoveCasing', -1, casingId)
+    Casings[casingId] = nil
 end)
 
--- QBCore Original Function
--- RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
---     local src = source
---     local Player = QBCore.Functions.GetPlayer(src)
---     if not Player then return end
---     local casingId = CreateCasingId()
---     local weaponInfo = QBCore.Shared.Weapons[weapon]
---     local serieNumber = nil
---     if weaponInfo then
---         local weaponItem = Player.Functions.GetItemByName(weaponInfo['name'])
---         if weaponItem then
---             if weaponItem.info and weaponItem.info ~= '' then
---                 serieNumber = weaponItem.info.serie
---             end
---         end
---     end
---     TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weapon, coords, serieNumber)
--- end)
+RegisterNetEvent('evidence:server:AddBulletImpactToInventory', function(bulletId, bulletInfo)
+    local src = source
+    local metadata = {
+        _type = 'bullet_impact',
+        info = bulletInfo,
+        label = 'Sachet de balle',
+    }
+    if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
+        return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.have_evidence_bag'), 'error')
+    end
+    exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata)
+    TriggerClientEvent('evidence:client:RemoveBulletImpact', -1, bulletId)
+    Bullets[bulletId] = nil
+end)
 
--- New Function
 RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    local inventory = exports.ox_inventory:GetInventoryItems(src)
-    local weaponName, serialNumber = nil, nil
+    local evangeCore = exports['evange-core']
+    local weapon = evangeCore:GetPlayerWeapon(src)
+    if not weapon then return end
+    local weaponName = weapon.name or nil
+    local serialNumber = weapon.metadata and weapon.metadata.serial or nil
+    local ammoType = weapon.ammo or nil
+    if not weaponName or not serialNumber then return end
 
-    for _, item in pairs(inventory) do
-        if item.name and joaat(item.name) == weapon then
-            weaponName = item.name
-            serialNumber = item.metadata and item.metadata.serial or nil
-            break
-        end
-    end
-    if not weaponName then return end
+    local ammoItem = exports.ox_inventory:Items(ammoType)
+    if not ammoItem then return end
+    local ammoLabel = ammoItem.label or nil
 
     local casingId = CreateCasingId()
-    TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weaponName, coords, serialNumber)
+    TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weaponName, coords, serialNumber, ammoLabel)
+end)
+
+RegisterNetEvent('evidence:server:CreateBulletImpact', function(weapon, coords)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    local evangeCore = exports['evange-core']
+    local weapon = evangeCore:GetPlayerWeapon(src)
+    if not weapon then return end
+    local weaponName = weapon.name or nil
+    local serialNumber = weapon.metadata and weapon.metadata.serial or nil
+    local ammoType = weapon.ammo or nil
+    if not weaponName or not serialNumber then return end
+
+    local ammoItem = exports.ox_inventory:Items(ammoType)
+    if not ammoItem then return end
+    local ammoLabel = ammoItem.label or nil
+
+    local bulletId = CreateBulletId()
+    TriggerClientEvent('evidence:client:AddBulletImpact', -1, bulletId, weaponName, coords, serialNumber, ammoLabel)
 end)

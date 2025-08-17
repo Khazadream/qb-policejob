@@ -1,7 +1,9 @@
 -- Variables
 local CurrentStatusList = {}
 local Casings = {}
+local Bullets = {}
 local CurrentCasing = nil
+local CurrentBullet = nil
 local Blooddrops = {}
 local CurrentBlooddrop = nil
 local Fingerprints = {}
@@ -64,6 +66,29 @@ local function DropBulletCasing(weapon, ped)
     local coords = GetOffsetFromEntityInWorldCoords(ped, randX, randY, 0)
     TriggerServerEvent('evidence:server:CreateCasing', weapon, coords)
     Wait(300)
+end
+
+local function DropBulletImpact(weapon, ped)
+    local maxAttempts = 5
+    local attempt = 0
+    local impactCoords = nil
+    local success = false
+
+    while attempt < maxAttempts do
+        success, impactCoords = GetPedLastWeaponImpactCoord(ped)
+        if success and impactCoords and #(impactCoords - vector3(0.0, 0.0, 0.0)) > 0.1 then
+            break
+        end
+        attempt = attempt + 1
+        Wait(100)
+    end
+
+    if success and impactCoords and #(impactCoords - vector3(0.0, 0.0, 0.0)) > 0.1 then
+        TriggerServerEvent('evidence:server:CreateBulletImpact', weapon, impactCoords)
+        return true
+    end
+
+    return false
 end
 
 local function DnaHash(s)
@@ -148,22 +173,41 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
     end)
 end)
 
-RegisterNetEvent('evidence:client:AddCasing', function(casingId, weapon, coords, serie)
+RegisterNetEvent('evidence:client:AddCasing', function(casingId, weapon, coords, serie, ammoType)
     Casings[casingId] = {
         type = weapon,
         serie = serie and serie or Lang:t('evidence.serial_not_visible'),
+        ammoType = ammoType,
         coords = {
             x = coords.x,
             y = coords.y,
             z = coords.z - 0.9
         }
     }
-    print('casingId', casingId, 'added')
+end)
+
+RegisterNetEvent('evidence:client:AddBulletImpact', function(casingId, weapon, coords, serie, ammoType)
+    Bullets[casingId] = {
+        type = weapon,
+        serie = serie and serie or Lang:t('evidence.serial_not_visible'),
+        ammoType = ammoType,
+        coords = {
+            x = coords.x,
+            y = coords.y,
+            -- z = coords.z - 0.9,
+            z = coords.z
+        }
+    }
 end)
 
 RegisterNetEvent('evidence:client:RemoveCasing', function(casingId)
     Casings[casingId] = nil
     CurrentCasing = 0
+end)
+
+RegisterNetEvent('evidence:client:RemoveBulletImpact', function(bulletId)
+    Bullets[bulletId] = nil
+    CurrentBullet = 0
 end)
 
 RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
@@ -232,15 +276,33 @@ CreateThread(function() -- Gunpowder Status when shooting
     end
 end)
 
+Citizen.CreateThread(function()
+    while true do
+        Wait(0)
+        local ped = GetPlayerPed(-1)
+        if IsPedShooting(ped) then
+            local weapon = GetSelectedPedWeapon(ped)
+            if not WhitelistedWeapon(weapon) then
+                if DropBulletImpact(weapon, ped) then
+                    Wait(1000)
+                end
+            end
+        end
+    end
+end)
+
 CreateThread(function()
+    local isDoingAction = false
     while true do
         Wait(1)
         if CurrentCasing and CurrentCasing ~= 0 then
             local pos = GetEntityCoords(PlayerPedId())
-            if #(pos - vector3(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)) < 1.5 then
-                DrawText3D(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z, Lang:t('info.bullet_casing', { value = Casings[CurrentCasing].type }))
-                if IsControlJustReleased(0, 47) then
-                    local s1, s2 = GetStreetNameAtCoord(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)
+            if #(pos - vector3(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)) < 2.5 then
+                DrawText3D(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z, Lang:t('info.bullet_casing', { value = Casings[CurrentCasing].ammoType }))
+                if IsControlJustReleased(0, 47) and not isDoingAction then
+                    isDoingAction = true
+                    local cc = Casings[CurrentCasing]
+                    local s1, s2 = GetStreetNameAtCoord(cc.coords.x, cc.coords.y, cc.coords.z)
                     local street1 = GetStreetNameFromHashKey(s1)
                     local street2 = GetStreetNameFromHashKey(s2)
                     local streetLabel = street1
@@ -251,11 +313,25 @@ CreateThread(function()
                         label = Lang:t('info.casing'),
                         type = 'casing',
                         street = streetLabel:gsub("%'", ''),
-                        ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[Casings[CurrentCasing].type]['ammotype']],
-                        ammotype = Casings[CurrentCasing].type,
-                        serie = Casings[CurrentCasing].serie
+                        ammolabel = cc.ammoType,
+                        ammotype = cc.type,
+                        serie = cc.serie
                     }
-                    TriggerServerEvent('evidence:server:AddCasingToInventory', CurrentCasing, info)
+                    local animDict = "pickup_object"
+                    local animName = "pickup_low"
+                    loadAnimDict(animDict)
+                    TaskPlayAnim(PlayerPedId(), animDict, animName, 8.0, 8.0, -1, 57, 1.0, false, false, false)
+                    QBCore.Functions.Progressbar('add_to_inventory', 'Récupération de la preuve', 1500, false, true, {
+                        disableMovement = false,
+                        disableCarMovement = false,
+                        disableMouse = false,
+                        disableCombat = true
+                    }, {}, {}, {}, function()
+                        TriggerServerEvent('evidence:server:AddCasingToInventory', CurrentCasing, info)
+                        isDoingAction = false
+                    end, function()
+                        isDoingAction = false
+                    end)
                 end
             end
         end
@@ -263,7 +339,7 @@ CreateThread(function()
         if CurrentBlooddrop and CurrentBlooddrop ~= 0 then
             local pos = GetEntityCoords(PlayerPedId())
             if #(pos - vector3(Blooddrops[CurrentBlooddrop].coords.x, Blooddrops[CurrentBlooddrop].coords.y,
-                    Blooddrops[CurrentBlooddrop].coords.z)) < 1.5 then
+                    Blooddrops[CurrentBlooddrop].coords.z)) < 2.5 then
                 DrawText3D(Blooddrops[CurrentBlooddrop].coords.x, Blooddrops[CurrentBlooddrop].coords.y, Blooddrops[CurrentBlooddrop].coords.z, Lang:t('info.blood_text', { value = DnaHash(Blooddrops[CurrentBlooddrop].citizenid) }))
                 if IsControlJustReleased(0, 47) then
                     local s1, s2 = GetStreetNameAtCoord(Blooddrops[CurrentBlooddrop].coords.x, Blooddrops[CurrentBlooddrop].coords.y, Blooddrops[CurrentBlooddrop].coords.z)
@@ -288,7 +364,7 @@ CreateThread(function()
         if CurrentFingerprint and CurrentFingerprint ~= 0 then
             local pos = GetEntityCoords(PlayerPedId())
             if #(pos - vector3(Fingerprints[CurrentFingerprint].coords.x, Fingerprints[CurrentFingerprint].coords.y,
-                    Fingerprints[CurrentFingerprint].coords.z)) < 1.5 then
+                    Fingerprints[CurrentFingerprint].coords.z)) < 2.5 then
                 DrawText3D(Fingerprints[CurrentFingerprint].coords.x, Fingerprints[CurrentFingerprint].coords.y, Fingerprints[CurrentFingerprint].coords.z, Lang:t('info.fingerprint_text'))
                 if IsControlJustReleased(0, 47) then
                     local s1, s2 = GetStreetNameAtCoord(Fingerprints[CurrentFingerprint].coords.x, Fingerprints[CurrentFingerprint].coords.y, Fingerprints[CurrentFingerprint].coords.z)
@@ -308,24 +384,65 @@ CreateThread(function()
                 end
             end
         end
-    end
-end)
 
-local function CheckIfPlayerHasUVLight()
-    local items = exports.ox_inventory:GetPlayerItems()
+        -- ========== BULLET IMPACTS ==========
+        if CurrentBullet and CurrentBullet ~= 0 then
+            local pos = GetEntityCoords(PlayerPedId())
+            if #(pos - vector3(Bullets[CurrentBullet].coords.x, Bullets[CurrentBullet].coords.y, Bullets[CurrentBullet].coords.z)) < 2.5 then
+                DrawText3D(
+                    Bullets[CurrentBullet].coords.x,
+                    Bullets[CurrentBullet].coords.y,
+                    Bullets[CurrentBullet].coords.z,
+                    Lang:t('info.bullet_impact_text')
+                )
+                if IsControlJustReleased(0, 47) and not isDoingAction then
+                    isDoingAction = true
+                    local bi = Bullets[CurrentBullet]
+                    local s1, s2 = GetStreetNameAtCoord(bi.coords.x, bi.coords.y, bi.coords.z)
+                    local street1 = GetStreetNameFromHashKey(s1)
+                    local street2 = GetStreetNameFromHashKey(s2)
+                    local streetLabel = street1
+                    if street2 then streetLabel = streetLabel .. ' | ' .. street2 end
 
-    for _, item in pairs(items) do
-        if item.name == 'WEAPON_POCKETLIGHT' and item.metadata and item.metadata.components then
-            for _, comp in ipairs(item.metadata.components) do
-                if comp == 'plight_uv' then
-                    return true
+                    local info = {
+                        label = Lang:t('info.bullet_impact'), -- add this key in your locales
+                        type = 'bulletimpact',
+                        street = streetLabel:gsub("%'", ''),
+                        ammolabel = bi.ammoType,
+                        ammotype = bi.type,
+                        serie = bi.serie
+                    }
+
+                    local animDict, animName = "pickup_object", "pickup_low"
+                    loadAnimDict(animDict)
+                    TaskPlayAnim(PlayerPedId(), animDict, animName, 8.0, 8.0, -1, 57, 1.0, false, false, false)
+
+                    QBCore.Functions.Progressbar('add_to_inventory', 'Récupération de la preuve', 1500, false, true, {
+                        disableMovement = false,
+                        disableCarMovement = false,
+                        disableMouse = false,
+                        disableCombat = true
+                    }, {}, {}, {}, function()
+                        -- Create matching server handler for this:
+                        -- evidence:server:AddBulletImpactToInventory(bulletId, info)
+                        TriggerServerEvent('evidence:server:AddBulletImpactToInventory', CurrentBullet, info)
+                        isDoingAction = false
+                    end, function()
+                        isDoingAction = false
+                    end)
                 end
             end
         end
     end
+end)
+
+local function CheckIfPlayerHasUVLight()
+    local evangeCore = exports['evange-core']
+    if evangeCore:HasCurrentWeaponComponent({'plight_uv'}) then
+        return true
+    end
     return false
 end
-
 
 CreateThread(function()
     while true do
@@ -333,7 +450,6 @@ CreateThread(function()
         if LocalPlayer.state.isLoggedIn then
             if PlayerJob.type == 'leo' and PlayerJob.onduty then
                 if IsPlayerFreeAiming(PlayerId()) and GetSelectedPedWeapon(PlayerPedId()) == `WEAPON_POCKETLIGHT` and CheckIfPlayerHasUVLight() then
-
                     if next(Casings) then
                         local pos = GetEntityCoords(PlayerPedId(), true)
                         for k, v in pairs(Casings) do
@@ -358,6 +474,15 @@ CreateThread(function()
                             local dist = #(pos - vector3(v.coords.x, v.coords.y, v.coords.z))
                             if dist < 1.5 then
                                 CurrentFingerprint = k
+                            end
+                        end
+                    end
+                    if next(Bullets) then
+                        local pos = GetEntityCoords(PlayerPedId(), true)
+                        for k, v in pairs(Bullets) do
+                            local dist = #(pos - vector3(v.coords.x, v.coords.y, v.coords.z))
+                            if dist < 1.5 then
+                                CurrentBullet = k
                             end
                         end
                     end

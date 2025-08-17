@@ -222,3 +222,15 @@ CreateThread(function()
         EndTextCommandSetBlipName(blip)
     end
 end)
+
+function loadAnimDict(dict)
+    if not DoesAnimDictExist(dict) then
+        return
+    end
+    if not HasAnimDictLoaded(dict) then
+        RequestAnimDict(dict)
+        while not HasAnimDictLoaded(dict) do
+            Wait(10)
+        end
+    end
+end

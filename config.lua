@@ -6,9 +6,9 @@ Config.LicenseRank = 2
 Config.ArmoryWhitelist = {}
 Config.WhitelistedVehicles = {}
 Config.PoliceHelicopter = 'POLMAV'
-Config.FuelResource = 'LegacyFuel' -- supports any that has a GetFuel() and SetFuel() export
+Config.FuelResource = 'ox_fuel' -- supports any that has a GetFuel() and SetFuel() export
 
-Config.useEvangeCore = false
+Config.useEvangeCore = true
 
 Config.AmmoLabels = {
     AMMO_PISTOL = '9x19mm parabellum bullet',
