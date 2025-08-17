@@ -27,7 +27,8 @@ client_scripts {
 	'client/tracker.lua',
 	'cl_khaza/shop.lua',
 	'cl_khaza/surveillance.lua',
-	'cl_khaza/spikes.lua'
+	'cl_khaza/spikes.lua',
+	'cl_khaza/interactions.lua'
 }
 
 server_scripts {
