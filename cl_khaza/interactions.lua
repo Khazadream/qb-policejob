@@ -9,9 +9,8 @@ local function InitPoliceInteraction()
                 icon = "fas fa-handcuffs",
                 label = "Menotter / Démenotter",
                 canInteract = function(entity)
-                    return IsPedAPlayer(entity)
+                    return IsPedAPlayer(entity) and exports.ox_inventory:GetItemCount('handcuffs') >= 1
                 end,
-                item = 'hancuffs',
                 job = 'police',
             },
             {
