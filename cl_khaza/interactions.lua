@@ -1,20 +1,40 @@
-local function InitPoliceInteraction()
+local PlayerHandcuffs = {}
 
+local function InitPoliceInteraction()
+    print('InitPoliceInteraction')
     exports['qb-target']:AddGlobalPlayer({
         options = {
             {
-                num = 1,
                 type = "client",
                 event = "police:client:CuffPlayerSoft",
                 icon = "fas fa-handcuffs",
-                label = "Menotter / Démenotter",
+                label = "Menotter",
                 canInteract = function(entity)
-                    return IsPedAPlayer(entity) and exports.ox_inventory:GetItemCount('handcuffs') >= 1
+                    if not IsPedAPlayer(entity) then return false end
+                    local playerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(entity))
+                    if PlayerHandcuffs[playerId] then
+                        return false
+                    end
+                    return exports.ox_inventory:GetItemCount('handcuffs') >= 1
                 end,
                 job = 'police',
             },
             {
-                num = 2,
+                type = "client",
+                event = "police:client:CuffPlayerSoft",
+                icon = "fas fa-handcuffs",
+                label = "Démenotter",
+                canInteract = function(entity)
+                    if not IsPedAPlayer(entity) then return false end
+                    local playerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(entity))
+                    if not PlayerHandcuffs[playerId] then
+                        return false
+                    end
+                    return true
+                end,
+                job = 'police',
+            },
+            {
                 type = "client",
                 event = "police:client:EscortPlayer",
                 icon = "fas fa-people-pulling",
@@ -25,7 +45,6 @@ local function InitPoliceInteraction()
                 job = 'police',
             },
             {
-                num = 3,
                 type = "client",
                 event = "police:client:BillPlayer",
                 icon = "fas fa-money-bill-wave",
@@ -38,7 +57,6 @@ local function InitPoliceInteraction()
         },
         distance = 2.5
     })
-
 end
 
 exports('handcuffs', function(data, slot)
@@ -61,6 +79,10 @@ AddEventHandler('onResourceStop', function(resourceName)
     end
 end)
 
+RegisterNetEvent('police:client:CuffedPlayers', function(data)
+    PlayerHandcuffs = data or {}
+end)
+
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
-    
+    PlayerHandcuffs = {}
 end)

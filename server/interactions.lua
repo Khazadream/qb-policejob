@@ -1,3 +1,5 @@
+local PlayerHandcuffs = {}
+
 RegisterNetEvent('police:server:SearchPlayer', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
@@ -26,9 +28,20 @@ RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff)
 
     local Player = QBCore.Functions.GetPlayer(src)
     local CuffedPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not Player or not CuffedPlayer or (not exports.ox_inventory:RemoveItem(src, 'handcuffs', 1) and Player.PlayerData.job.type ~= 'leo') then return end
-
+    if not Player or not CuffedPlayer then return end
+    if Player.PlayerData.job.type ~= 'leo' then return end
+    if not PlayerHandcuffs[playerId] then
+        if not exports.ox_inventory:RemoveItem(src, 'handcuffs', 1) then return end
+        PlayerHandcuffs[playerId] = true
+    else
+        if not exports.ox_inventory:AddItem(src, 'handcuffs', 1) then return end
+        PlayerHandcuffs[playerId] = nil
+    end
     TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, isSoftcuff)
+    TriggerClientEvent('police:client:CuffedPlayers', -1, PlayerHandcuffs)
+    if not PlayerHandcuffs[playerId] then
+        TriggerClientEvent('police:client:UnCuff', playerId)
+    end
 end)
 
 RegisterNetEvent('police:server:EscortPlayer', function(playerId)
