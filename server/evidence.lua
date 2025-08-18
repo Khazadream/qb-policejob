@@ -1,3 +1,5 @@
+local QBCore = exports['qb-core']:GetCoreObject()
+
 local Casings = {}
 local Bullets = {}
 local BloodDrops = {}
@@ -203,23 +205,144 @@ RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weaponName, coords, serialNumber, ammoLabel)
 end)
 
+-- RegisterNetEvent('evidence:server:CreateBulletImpact', function(weapon, coords)
+--     local src = source
+--     local Player = QBCore.Functions.GetPlayer(src)
+--     if not Player then return end
+
+--     local evangeCore = exports['evange-core']
+--     local weapon = evangeCore:GetPlayerWeapon(src)
+--     if not weapon then return end
+--     local weaponName = weapon.name or nil
+--     local serialNumber = weapon.metadata and weapon.metadata.serial or nil
+--     local ammoType = weapon.ammo or nil
+--     if not weaponName or not serialNumber then return end
+
+--     local ammoItem = exports.ox_inventory:Items(ammoType)
+--     if not ammoItem then return end
+--     local ammoLabel = ammoItem.label or nil
+
+--     local bulletId = CreateBulletId()
+--     TriggerClientEvent('evidence:client:AddBulletImpact', -1, bulletId, weaponName, coords, serialNumber, ammoLabel)
+-- end)
+
+-- WORLD / WALL IMPACT (coords)
 RegisterNetEvent('evidence:server:CreateBulletImpact', function(weapon, coords)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local evangeCore = exports['evange-core']
-    local weapon = evangeCore:GetPlayerWeapon(src)
-    if not weapon then return end
-    local weaponName = weapon.name or nil
-    local serialNumber = weapon.metadata and weapon.metadata.serial or nil
-    local ammoType = weapon.ammo or nil
-    if not weaponName or not serialNumber then return end
+    local weap = evangeCore:GetPlayerWeapon(src)
+    if not weap then return end
+
+    local weaponName   = weap.name
+    local serialNumber = weap.metadata and weap.metadata.serial or nil
+    local ammoType     = weap.ammo
+    if not weaponName or not serialNumber or not ammoType then return end
 
     local ammoItem = exports.ox_inventory:Items(ammoType)
     if not ammoItem then return end
     local ammoLabel = ammoItem.label or nil
+    if not ammoLabel then return end
 
     local bulletId = CreateBulletId()
+    Bullets[bulletId] = {
+        _type = 'bullet_map',
+        type = weaponName,
+        serie = serialNumber,
+        ammoType = ammoType,
+        coords = coords,
+    }
     TriggerClientEvent('evidence:client:AddBulletImpact', -1, bulletId, weaponName, coords, serialNumber, ammoLabel)
+end)
+
+-- PLAYER IMPACT ({ target = serverId, bone = number })
+RegisterNetEvent('evidence:server:CreateBulletImpactOnPlayer', function(weapon, data)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    
+    local targetPlayer = QBCore.Functions.GetPlayer(data.target)
+
+    if type(data) ~= 'table' or not data.target then return end
+    -- optional: normalize bone
+    data.bone = data.bone or 0
+
+    local evangeCore = exports['evange-core']
+    local weap = evangeCore:GetPlayerWeapon(src)
+    if not weap then return end
+
+    local weaponName   = weap.name
+    local serialNumber = weap.metadata and weap.metadata.serial or nil
+    local ammoType     = weap.ammo
+    if not weaponName or not serialNumber or not ammoType then return end
+
+    local ammoItem = exports.ox_inventory:Items(ammoType)
+    if not ammoItem then return end
+    local ammoLabel = ammoItem.label or nil
+    if not ammoLabel then return end
+
+    local bulletId = CreateBulletId()
+    local citizenId = targetPlayer.PlayerData.citizenid
+    Bullets[bulletId] = {
+        _type = 'bullet_player',
+        type = weaponName,
+        serie = serialNumber,
+        ammoType = ammoType,
+        target = data.target,
+        bone = data.bone,
+        citizenId = citizenId,
+    }
+    TriggerClientEvent('evidence:client:AddBulletImpactOnPlayer', -1, bulletId, Bullets[bulletId])
+end)
+
+QBCore.Functions.CreateCallback('evidence:server:GetBulletImpactsForPlayer', function(src, cb, playerId)
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return cb(nil) end
+
+    local targetPlayer = QBCore.Functions.GetPlayer(playerId)
+    print('targetPlayer', targetPlayer)
+    if not targetPlayer then return cb(nil) end
+
+    local citizenId = targetPlayer.PlayerData.citizenid
+    local bulletImpacts = {}
+    for bulletId, bullet in pairs(Bullets) do
+        if type(bullet) == 'table' and bullet._type == 'bullet_player' and bullet.citizenId == citizenId then
+            bulletImpacts[#bulletImpacts + 1] = {
+                id = bulletId,
+                type = bullet.type,
+                serie = bullet.serie,
+                ammoType = bullet.ammoType,
+                target = bullet.target,
+                bone = bullet.bone,
+                citizenId = bullet.citizenId,
+            }
+        end
+    end
+    cb(bulletImpacts)
+end)
+
+local function AddBulletToInventory(src, bullet)
+    local metadata = {
+        _type = 'bullet_impact',
+        info = bullet,
+        label = 'Sachet de balle',
+    }
+    exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata)
+end
+
+QBCore.Functions.CreateCallback('evidence:server:ExtractBullets', function(src, cb, bulletImpacts)
+    local extractedBullets = {}
+    for _, bullet in pairs(bulletImpacts) do
+        -- 20% chance to extract the bullet
+        if math.random(1, 5) == 1 then
+            extractedBullets[#extractedBullets + 1] = bullet
+            AddBulletToInventory(src, bullet)
+        end
+        TriggerClientEvent('evidence:client:RemoveBulletImpact', -1, bullet.id)
+        Bullets[bullet.id] = nil
+    end
+    cb(extractedBullets)
 end)

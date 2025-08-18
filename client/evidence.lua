@@ -68,28 +68,77 @@ local function DropBulletCasing(weapon, ped)
     Wait(300)
 end
 
-local function DropBulletImpact(weapon, ped)
-    local maxAttempts = 5
-    local attempt = 0
-    local impactCoords = nil
-    local success = false
+-- local function DropBulletImpact(weapon, ped)
+--     local maxAttempts = 5
+--     local attempt = 0
+--     local impactCoords = nil
+--     local success = false
 
+--     while attempt < maxAttempts do
+--         success, impactCoords = GetPedLastWeaponImpactCoord(ped)
+--         if success and impactCoords and #(impactCoords - vector3(0.0, 0.0, 0.0)) > 0.1 then
+--             break
+--         end
+--         attempt = attempt + 1
+--         Wait(100)
+--     end
+
+--     if success and impactCoords and #(impactCoords - vector3(0.0, 0.0, 0.0)) > 0.1 then
+--         TriggerServerEvent('evidence:server:CreateBulletImpact', weapon, impactCoords)
+--         return true
+--     end
+
+--     return false
+-- end
+
+-- helper: quick raycast from -> to
+local function RaycastToPoint(from, to, ignore)
+    local handle = StartShapeTestRay(from.x, from.y, from.z, to.x, to.y, to.z, -1, ignore, 0)
+    local _, hit, endPos, _, entityHit = GetShapeTestResult(handle)
+    return hit == 1, endPos, entityHit
+end
+
+-- drop one bullet impact; player vs world go to different server events
+local function DropBulletImpact(weapon, ped)
+    local maxAttempts, attempt = 5, 0
+    local success, impactCoords
+
+    -- wait a tick for the engine to register an impact
     while attempt < maxAttempts do
         success, impactCoords = GetPedLastWeaponImpactCoord(ped)
         if success and impactCoords and #(impactCoords - vector3(0.0, 0.0, 0.0)) > 0.1 then
             break
         end
         attempt = attempt + 1
-        Wait(100)
+        Wait(60)
     end
 
-    if success and impactCoords and #(impactCoords - vector3(0.0, 0.0, 0.0)) > 0.1 then
-        TriggerServerEvent('evidence:server:CreateBulletImpact', weapon, impactCoords)
-        return true
+    if not (success and impactCoords) then
+        return false
     end
 
-    return false
+    local shooterPos = GetEntityCoords(ped)
+    local hit, _, entityHit = RaycastToPoint(shooterPos, impactCoords, ped)
+
+    if hit and entityHit ~= 0 and GetEntityType(entityHit) == 1 and IsPedAPlayer(entityHit) then
+        -- hit a player
+        local tgtPlayerIdx = NetworkGetPlayerIndexFromPed(entityHit)
+        if tgtPlayerIdx ~= -1 then
+            local targetServerId = GetPlayerServerId(tgtPlayerIdx)
+            local _, bone = GetPedLastDamageBone(entityHit)  -- optional, 0 if unknown
+            TriggerServerEvent('evidence:server:CreateBulletImpactOnPlayer', weapon, {
+                target = targetServerId,
+                bone = bone or 0
+            })
+            return true
+        end
+    end
+
+    -- world / wall hit
+    TriggerServerEvent('evidence:server:CreateBulletImpact', weapon, impactCoords)
+    return true
 end
+
 
 local function DnaHash(s)
     local h = string.gsub(s, '.', function(c)
@@ -186,18 +235,32 @@ RegisterNetEvent('evidence:client:AddCasing', function(casingId, weapon, coords,
     }
 end)
 
-RegisterNetEvent('evidence:client:AddBulletImpact', function(casingId, weapon, coords, serie, ammoType)
-    Bullets[casingId] = {
+-- RegisterNetEvent('evidence:client:AddBulletImpact', function(casingId, weapon, coords, serie, ammoType)
+--     Bullets[casingId] = {
+--         type = weapon,
+--         serie = serie and serie or Lang:t('evidence.serial_not_visible'),
+--         ammoType = ammoType,
+--         coords = {
+--             x = coords.x,
+--             y = coords.y,
+--             z = coords.z
+--         }
+--     }
+-- end)
+
+-- Bullet impact world / wall
+RegisterNetEvent('evidence:client:AddBulletImpact', function(bulletId, weapon, coords, serie, ammoType)
+    Bullets[bulletId] = {
         type = weapon,
-        serie = serie and serie or Lang:t('evidence.serial_not_visible'),
+        serie = serie or Lang:t('evidence.serial_not_visible'),
         ammoType = ammoType,
-        coords = {
-            x = coords.x,
-            y = coords.y,
-            -- z = coords.z - 0.9,
-            z = coords.z
-        }
+        coords = { x = coords.x, y = coords.y, z = coords.z }
     }
+end)
+
+-- Bullet impact player
+RegisterNetEvent('evidence:client:AddBulletImpactOnPlayer', function(bulletId, bullet)
+    Bullets[bulletId] = bullet
 end)
 
 RegisterNetEvent('evidence:client:RemoveCasing', function(casingId)
@@ -206,6 +269,7 @@ RegisterNetEvent('evidence:client:RemoveCasing', function(casingId)
 end)
 
 RegisterNetEvent('evidence:client:RemoveBulletImpact', function(bulletId)
+    print('RemoveBulletImpact', bulletId)
     Bullets[bulletId] = nil
     CurrentBullet = 0
 end)
@@ -480,9 +544,11 @@ CreateThread(function()
                     if next(Bullets) then
                         local pos = GetEntityCoords(PlayerPedId(), true)
                         for k, v in pairs(Bullets) do
+                            if v.coords then
                             local dist = #(pos - vector3(v.coords.x, v.coords.y, v.coords.z))
-                            if dist < 1.5 then
-                                CurrentBullet = k
+                                if dist < 1.5 then
+                                    CurrentBullet = k
+                                end
                             end
                         end
                     end
@@ -495,3 +561,126 @@ CreateThread(function()
         end
     end
 end)
+
+
+-- TEST
+-- === Debug/inspection: show bullet impacts attached to ME ===
+-- debug sphere config
+local ImpactSphere = {
+    radius = 0.22,                 -- sphere size
+    color  = { r = 80, g = 180, b = 255, a = 180 },
+    faceCam = false,               -- keep false for a true sphere
+    bob     = false,               -- bob up/down
+}
+
+local ImpactHighlights = {}  -- [bulletId] = expireTime
+
+local function StartImpactHighlighter()
+    if ImpactHighlights._active then return end
+    ImpactHighlights._active = true
+
+    CreateThread(function()
+        while true do
+            local now = GetGameTimer()
+            local any = false
+
+            for bulletId, expireAt in pairs(ImpactHighlights) do
+                if type(bulletId) == 'number' and expireAt then
+                    any = true
+                    if now > expireAt then
+                        ImpactHighlights[bulletId] = nil
+                    else
+                        local bi = Bullets[bulletId]
+                        if bi then
+                            -- Resolve position on my ped (bone if available)
+                            local ped = PlayerPedId()
+                            local pos
+                            if bi.bone and bi.bone ~= 0 then
+                                pos = GetPedBoneCoords(ped, bi.bone, 0.0, 0.0, 0.0)
+                            else
+                                pos = GetEntityCoords(ped)
+                            end
+
+                            -- Draw a sphere at the impact
+                            -- DrawMarker(type=28, pos, dir=0, rot=0, scale=radius, color, bob, faceCam, p19=2, rotate=false)
+                            DrawMarker(
+                                28,
+                                pos.x, pos.y, pos.z,
+                                0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0,
+                                ImpactSphere.radius, ImpactSphere.radius, ImpactSphere.radius,
+                                ImpactSphere.color.r, ImpactSphere.color.g, ImpactSphere.color.b, ImpactSphere.color.a,
+                                ImpactSphere.bob, ImpactSphere.faceCam, 2, false, nil, nil, false
+                            )
+
+                            -- (optional) keep the text
+                            local weaponLabel = exports.ox_inventory:Items(bi.type)
+                            local ammoType = bi.ammoType
+                            local label = ('%s | %s'):format(weaponLabel.label or 'Weapon ?', ammoType or 'Ammo ?')
+                            DrawText3D(pos.x, pos.y, pos.z + 0.05, ('Impact #%s\n%s'):format(bulletId, label))
+                        end
+                    end
+                end
+            end
+
+            if not any then
+                ImpactHighlights._active = false
+                break
+            end
+
+            Wait(0)
+        end
+    end)
+end
+
+-- /myimpacts : highlight all bullet impacts linked to my player for 8 seconds
+RegisterCommand('myimpacts', function()
+    -- local myServerId = GetPlayerServerId(PlayerId())
+    local PlayerData = QBCore.Functions.GetPlayerData()
+    local citizenId = PlayerData.citizenid
+    local count = 0
+
+    for id, v in pairs(Bullets) do
+        if v.citizenId and v.citizenId == citizenId then
+            ImpactHighlights[id] = GetGameTimer() + 8000 -- 8s highlight per impact
+            count = count + 1
+        end
+    end
+
+    if count == 0 then
+        if QBCore and QBCore.Functions and QBCore.Functions.Notify then
+            QBCore.Functions.Notify('No bullet impacts attached to you.', 'error')
+        else
+            print('[evidence] No bullet impacts attached to you.')
+        end
+        return
+    end
+
+    if QBCore and QBCore.Functions and QBCore.Functions.Notify then
+        QBCore.Functions.Notify(('Showing %d impact(s) on you for 8s.'):format(count), 'success')
+    else
+        print(('[evidence] Showing %d impact(s) on you for 8s.'):format(count))
+    end
+
+    StartImpactHighlighter()
+end, false)
+
+-- TEST COMMAND: /testimpact
+RegisterCommand("testimpact", function()
+    local ped = PlayerPedId()
+    local myId = GetPlayerServerId(PlayerId())
+
+    -- Example bone (head = 31086, chest = 24818)
+    local testBone = 31086  
+
+    -- Fake weapon data
+    local weapon = `WEAPON_PISTOL`
+
+    -- Send to server as if you were shot
+    TriggerServerEvent("evidence:server:CreateBulletImpactOnPlayer", weapon, {
+        target = myId,
+        bone = testBone
+    })
+
+    QBCore.Functions.Notify("Simulated bullet impact on yourself (bone: " .. testBone .. ")", "success")
+end, false)
