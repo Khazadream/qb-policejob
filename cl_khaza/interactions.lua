@@ -11,6 +11,7 @@ local function InitPoliceInteraction()
                 canInteract = function(entity)
                     return IsPedAPlayer(entity)
                 end,
+                item = 'hancuffs',
                 job = 'police',
             },
             {
