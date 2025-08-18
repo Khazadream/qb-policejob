@@ -269,7 +269,6 @@ RegisterNetEvent('evidence:client:RemoveCasing', function(casingId)
 end)
 
 RegisterNetEvent('evidence:client:RemoveBulletImpact', function(bulletId)
-    print('RemoveBulletImpact', bulletId)
     Bullets[bulletId] = nil
     CurrentBullet = 0
 end)

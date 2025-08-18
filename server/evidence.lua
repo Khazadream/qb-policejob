@@ -303,7 +303,6 @@ QBCore.Functions.CreateCallback('evidence:server:GetBulletImpactsForPlayer', fun
     if not Player then return cb(nil) end
 
     local targetPlayer = QBCore.Functions.GetPlayer(playerId)
-    print('targetPlayer', targetPlayer)
     if not targetPlayer then return cb(nil) end
 
     local citizenId = targetPlayer.PlayerData.citizenid
