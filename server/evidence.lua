@@ -252,6 +252,7 @@ RegisterNetEvent('evidence:server:CreateBulletImpact', function(weapon, coords)
         type = weaponName,
         serie = serialNumber,
         ammoType = ammoType,
+        ammoLabel = ammoLabel,
         coords = coords,
     }
     TriggerClientEvent('evidence:client:AddBulletImpact', -1, bulletId, weaponName, coords, serialNumber, ammoLabel)
@@ -313,6 +314,7 @@ QBCore.Functions.CreateCallback('evidence:server:GetBulletImpactsForPlayer', fun
                 id = bulletId,
                 type = bullet.type,
                 serie = bullet.serie,
+                ammoLabel = bullet.ammoLabel,
                 ammoType = bullet.ammoType,
                 target = bullet.target,
                 bone = bullet.bone,
