@@ -382,6 +382,47 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
     end
 end)
 
+local function InstructionButton(ControlButton)
+    ScaleformMovieMethodAddParamPlayerNameString(ControlButton)
+end
+
+local function InstructionButtonMessage(text)
+    BeginTextCommandScaleformString('STRING')
+    AddTextComponentScaleform(text)
+    EndTextCommandScaleformString()
+end
+
+local function CreateInstuctionScaleform(scaleform)
+    scaleform = RequestScaleformMovie(scaleform)
+    while not HasScaleformMovieLoaded(scaleform) do
+        Wait(0)
+    end
+    PushScaleformMovieFunction(scaleform, 'CLEAR_ALL')
+    PopScaleformMovieFunctionVoid()
+
+    PushScaleformMovieFunction(scaleform, 'SET_CLEAR_SPACE')
+    PushScaleformMovieFunctionParameterInt(200)
+    PopScaleformMovieFunctionVoid()
+
+    PushScaleformMovieFunction(scaleform, 'SET_DATA_SLOT')
+    PushScaleformMovieFunctionParameterInt(1)
+    InstructionButton(GetControlInstructionalButton(1, 194, true))
+    InstructionButtonMessage(Lang:t('info.close_camera'))
+    PopScaleformMovieFunctionVoid()
+
+    PushScaleformMovieFunction(scaleform, 'DRAW_INSTRUCTIONAL_BUTTONS')
+    PopScaleformMovieFunctionVoid()
+
+    PushScaleformMovieFunction(scaleform, 'SET_BACKGROUND_COLOUR')
+    PushScaleformMovieFunctionParameterInt(0)
+    PushScaleformMovieFunctionParameterInt(0)
+    PushScaleformMovieFunctionParameterInt(0)
+    PushScaleformMovieFunctionParameterInt(80)
+    PopScaleformMovieFunctionVoid()
+
+    return scaleform
+end
+
 -- Threads
 CreateThread(function()
     while true do
@@ -395,6 +436,14 @@ CreateThread(function()
             EnableControlAction(0, 322, true)
             EnableControlAction(0, 249, true)
             EnableControlAction(0, 46, true)
+        end
+
+        if isEscorting then
+            local instructions = CreateInstuctionScaleform('instructional_buttons')
+            DrawScaleformMovieFullscreen(instructions, 255, 255, 255, 255, 0)
+            if IsControlJustPressed(1, 177) then
+                TriggerEvent("police:client:EscortPlayer")
+            end
         end
 
         if isHandcuffed then
