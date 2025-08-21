@@ -376,9 +376,10 @@ CreateThread(function()
                         label = Lang:t('info.casing'),
                         type = 'casing',
                         street = streetLabel:gsub("%'", ''),
-                        ammolabel = cc.ammoType,
-                        ammotype = cc.type,
-                        serie = cc.serie
+                        ammoLabel = cc.ammoType,
+                        ammoType = cc.type,
+                        serie = cc.serie,
+                        coords = cc.coords or nil,
                     }
                     local animDict = "pickup_object"
                     local animName = "pickup_low"
@@ -466,14 +467,14 @@ CreateThread(function()
                     local street2 = GetStreetNameFromHashKey(s2)
                     local streetLabel = street1
                     if street2 then streetLabel = streetLabel .. ' | ' .. street2 end
-
                     local info = {
                         label = Lang:t('info.bullet_impact'), -- add this key in your locales
-                        type = 'bulletimpact',
+                        type = 'bullet_impact',
                         street = streetLabel:gsub("%'", ''),
-                        ammolabel = bi.ammoType,
-                        ammotype = bi.type,
-                        serie = bi.serie
+                        ammoLabel = bi.ammoType,
+                        ammoType = bi.type,
+                        serie = bi.serie,
+                        coords = bi.coords or nil,
                     }
 
                     local animDict, animName = "pickup_object", "pickup_low"
@@ -486,8 +487,6 @@ CreateThread(function()
                         disableMouse = false,
                         disableCombat = true
                     }, {}, {}, {}, function()
-                        -- Create matching server handler for this:
-                        -- evidence:server:AddBulletImpactToInventory(bulletId, info)
                         TriggerServerEvent('evidence:server:AddBulletImpactToInventory', CurrentBullet, info)
                         isDoingAction = false
                     end, function()
@@ -565,121 +564,69 @@ end)
 -- TEST
 -- === Debug/inspection: show bullet impacts attached to ME ===
 -- debug sphere config
-local ImpactSphere = {
-    radius = 0.22,                 -- sphere size
-    color  = { r = 80, g = 180, b = 255, a = 180 },
-    faceCam = false,               -- keep false for a true sphere
-    bob     = false,               -- bob up/down
-}
+-- local ImpactSphere = {
+--     radius = 0.22,                 -- sphere size
+--     color  = { r = 80, g = 180, b = 255, a = 180 },
+--     faceCam = false,               -- keep false for a true sphere
+--     bob     = false,               -- bob up/down
+-- }
 
-local ImpactHighlights = {}  -- [bulletId] = expireTime
+-- local ImpactHighlights = {}  -- [bulletId] = expireTime
 
-local function StartImpactHighlighter()
-    if ImpactHighlights._active then return end
-    ImpactHighlights._active = true
+-- local function StartImpactHighlighter()
+--     if ImpactHighlights._active then return end
+--     ImpactHighlights._active = true
 
-    CreateThread(function()
-        while true do
-            local now = GetGameTimer()
-            local any = false
+--     CreateThread(function()
+--         while true do
+--             local now = GetGameTimer()
+--             local any = false
 
-            for bulletId, expireAt in pairs(ImpactHighlights) do
-                if type(bulletId) == 'number' and expireAt then
-                    any = true
-                    if now > expireAt then
-                        ImpactHighlights[bulletId] = nil
-                    else
-                        local bi = Bullets[bulletId]
-                        if bi then
-                            -- Resolve position on my ped (bone if available)
-                            local ped = PlayerPedId()
-                            local pos
-                            if bi.bone and bi.bone ~= 0 then
-                                pos = GetPedBoneCoords(ped, bi.bone, 0.0, 0.0, 0.0)
-                            else
-                                pos = GetEntityCoords(ped)
-                            end
+--             for bulletId, expireAt in pairs(ImpactHighlights) do
+--                 if type(bulletId) == 'number' and expireAt then
+--                     any = true
+--                     if now > expireAt then
+--                         ImpactHighlights[bulletId] = nil
+--                     else
+--                         local bi = Bullets[bulletId]
+--                         if bi then
+--                             -- Resolve position on my ped (bone if available)
+--                             local ped = PlayerPedId()
+--                             local pos
+--                             if bi.bone and bi.bone ~= 0 then
+--                                 pos = GetPedBoneCoords(ped, bi.bone, 0.0, 0.0, 0.0)
+--                             else
+--                                 pos = GetEntityCoords(ped)
+--                             end
 
-                            -- Draw a sphere at the impact
-                            -- DrawMarker(type=28, pos, dir=0, rot=0, scale=radius, color, bob, faceCam, p19=2, rotate=false)
-                            DrawMarker(
-                                28,
-                                pos.x, pos.y, pos.z,
-                                0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0,
-                                ImpactSphere.radius, ImpactSphere.radius, ImpactSphere.radius,
-                                ImpactSphere.color.r, ImpactSphere.color.g, ImpactSphere.color.b, ImpactSphere.color.a,
-                                ImpactSphere.bob, ImpactSphere.faceCam, 2, false, nil, nil, false
-                            )
+--                             -- Draw a sphere at the impact
+--                             -- DrawMarker(type=28, pos, dir=0, rot=0, scale=radius, color, bob, faceCam, p19=2, rotate=false)
+--                             DrawMarker(
+--                                 28,
+--                                 pos.x, pos.y, pos.z,
+--                                 0.0, 0.0, 0.0,
+--                                 0.0, 0.0, 0.0,
+--                                 ImpactSphere.radius, ImpactSphere.radius, ImpactSphere.radius,
+--                                 ImpactSphere.color.r, ImpactSphere.color.g, ImpactSphere.color.b, ImpactSphere.color.a,
+--                                 ImpactSphere.bob, ImpactSphere.faceCam, 2, false, nil, nil, false
+--                             )
 
-                            -- (optional) keep the text
-                            local weaponLabel = exports.ox_inventory:Items(bi.type)
-                            local ammoType = bi.ammoType
-                            local label = ('%s | %s'):format(weaponLabel.label or 'Weapon ?', ammoType or 'Ammo ?')
-                            DrawText3D(pos.x, pos.y, pos.z + 0.05, ('Impact #%s\n%s'):format(bulletId, label))
-                        end
-                    end
-                end
-            end
+--                             -- (optional) keep the text
+--                             local weaponLabel = exports.ox_inventory:Items(bi.type)
+--                             local ammoType = bi.ammoType
+--                             local label = ('%s | %s'):format(weaponLabel.label or 'Weapon ?', ammoType or 'Ammo ?')
+--                             DrawText3D(pos.x, pos.y, pos.z + 0.05, ('Impact #%s\n%s'):format(bulletId, label))
+--                         end
+--                     end
+--                 end
+--             end
 
-            if not any then
-                ImpactHighlights._active = false
-                break
-            end
+--             if not any then
+--                 ImpactHighlights._active = false
+--                 break
+--             end
 
-            Wait(0)
-        end
-    end)
-end
-
--- /myimpacts : highlight all bullet impacts linked to my player for 8 seconds
-RegisterCommand('myimpacts', function()
-    -- local myServerId = GetPlayerServerId(PlayerId())
-    local PlayerData = QBCore.Functions.GetPlayerData()
-    local citizenId = PlayerData.citizenid
-    local count = 0
-
-    for id, v in pairs(Bullets) do
-        if v.citizenId and v.citizenId == citizenId then
-            ImpactHighlights[id] = GetGameTimer() + 8000 -- 8s highlight per impact
-            count = count + 1
-        end
-    end
-
-    if count == 0 then
-        if QBCore and QBCore.Functions and QBCore.Functions.Notify then
-            QBCore.Functions.Notify('No bullet impacts attached to you.', 'error')
-        else
-            print('[evidence] No bullet impacts attached to you.')
-        end
-        return
-    end
-
-    if QBCore and QBCore.Functions and QBCore.Functions.Notify then
-        QBCore.Functions.Notify(('Showing %d impact(s) on you for 8s.'):format(count), 'success')
-    else
-        print(('[evidence] Showing %d impact(s) on you for 8s.'):format(count))
-    end
-
-    StartImpactHighlighter()
-end, false)
-
--- TEST COMMAND: /testimpact
-RegisterCommand("testimpact", function()
-    local ped = PlayerPedId()
-    local myId = GetPlayerServerId(PlayerId())
-
-    -- Example bone (head = 31086, chest = 24818)
-    local testBone = 31086  
-
-    -- Fake weapon data
-    local weapon = `WEAPON_PISTOL`
-
-    -- Send to server as if you were shot
-    TriggerServerEvent("evidence:server:CreateBulletImpactOnPlayer", weapon, {
-        target = myId,
-        bone = testBone
-    })
-
-    QBCore.Functions.Notify("Simulated bullet impact on yourself (bone: " .. testBone .. ")", "success")
-end, false)
+--             Wait(0)
+--         end
+--     end)
+-- end

@@ -10,6 +10,8 @@ local function RegisterOxShop()
             { name = 'spikes', price = 10},
             -- Weapon
             { name = "WEAPON_POCKETLIGHT", price = 15000, image = 'uvtorch.png', metadata = { label = 'Lampe à UV', components = {"plight_uv" } }},
+            { name = 'toolbox_weapon_analysis', price = 10000 },
+            { name = 'evange_backpack_duty', price = 10000  },
         },
     })
 end
