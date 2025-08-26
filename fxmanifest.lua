@@ -28,7 +28,8 @@ client_scripts {
 	'cl_khaza/shop.lua',
 	'cl_khaza/surveillance.lua',
 	'cl_khaza/spikes.lua',
-	'cl_khaza/interactions.lua'
+	'cl_khaza/interactions.lua',
+	'cl_khaza/anklet.lua'
 }
 
 server_scripts {
@@ -40,7 +41,8 @@ server_scripts {
 	'server/objects.lua',
 	'server/vehicle.lua',
 	'sv_khaza/shop.lua',
-	'sv_khaza/spikes.lua'
+	'sv_khaza/spikes.lua',
+	'sv_khaza/anklet.lua'
 }
 
 ui_page 'html/index.html'
