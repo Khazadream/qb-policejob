@@ -1,38 +1,5 @@
 local PlayerHandcuffs = {}
 
-Config.AnkletSetupLocation = {
-    [1] = {
-        position = vector4(-386.0, -419.53, 25.06, 167.64),
-        rotation = vector3(40, 180, -20),
-        scale = 0.8,
-        zone = {
-            type = 'circleZone',
-            position = vector4(-385.66, -418.09, 25.1, 177.01),
-            radius = 0.8,
-            useZ = true,
-            debugPoly = Config.debugPoly
-        },
-        url = 'https://static.wikia.nocookie.net/morelife/images/7/7f/LSPD-logo.png/revision/latest?cb=20240305013722&path-prefix=fr',
-        label = 'Configurer un bracelet électronique',
-        icon = 'fa fa-code',
-    },
-    [2] = {
-        position = vector4(-391.15, -418.59, 25.06, 167.76),
-        rotation = vector3(40, 180, -20),
-        scale = 0.8,
-        zone = {
-            type = 'circleZone',
-            position = vector4(-390.59, -417.2, 25.1, 169.39),
-            radius = 0.8,
-            useZ = true,
-            debugPoly = Config.debugPoly
-        },
-        url = 'https://static.wikia.nocookie.net/morelife/images/7/7f/LSPD-logo.png/revision/latest?cb=20240305013722&path-prefix=fr',
-        label = 'Configurer un bracelet électronique',
-        icon = 'fa fa-code',
-    },
-}
-
 local function InitPoliceInteraction()
     print('InitPoliceInteraction')
     exports['qb-target']:AddGlobalPlayer({
@@ -104,7 +71,7 @@ local function PrintCell(label, value)
     )
 end
 
-local function SetUpAnklet(suspectPlayerData)
+local function SetUpAnkletMenu(suspectPlayerData)
 
     -- -- Informations
     -- Prénom
@@ -119,7 +86,7 @@ local function SetUpAnklet(suspectPlayerData)
 
     --local playerData = QBCore.Functions.GetPlayerData()
     local playerData = suspectPlayerData
-
+    local menusIndex = #menus
     menus[#menus + 1] = exports['interactionMenu']:Create {
         rotation = vector3(40, 180, -20), --vector3(-40, 0, 270),
         position = vector4(-386.0, -419.53, 25.06, 167.64), --position,
@@ -148,21 +115,23 @@ local function SetUpAnklet(suspectPlayerData)
                 label = 'Activer / Désactiver le bracelet électronique',
                 icon = 'fa fa-code',
                 action = function(data)
+                    StopAnimTask(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0)
                     RequestAnimDict("anim@heists@prison_heiststation@cop_reactions")
                     while (not HasAnimDictLoaded("anim@heists@prison_heiststation@cop_reactions")) do Wait(0) end
                     TaskPlayAnim(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0, -1.0, 10000, 1, 1, true, true, true)
                     TriggerEvent("police:client:CheckDistance")
+                    DestroyMenu(menusIndex)
                 end
             },
         }
     }
-
 end
 
 local function InitMenuInteraction()
+    local job = QBCore.Functions.GetPlayerData().job
+    if job.name ~= 'police' then return end
 
     for k, v in pairs(Config.AnkletSetupLocation) do
-
         menus[k] = exports['interactionMenu']:Create {
             rotation = v.rotation,
             position = v.position,
@@ -178,83 +147,12 @@ local function InitMenuInteraction()
                     label = v.label,
                     icon = v.icon,
                     action = function(data)
-                        RequestAnimDict("anim@heists@prison_heiststation@cop_reactions")
-                        while (not HasAnimDictLoaded("anim@heists@prison_heiststation@cop_reactions")) do Wait(0) end
-                        TaskPlayAnim(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0, -1.0, 10000, 1, 1, true, true, true)
-                        TriggerEvent("qb-policejob:client:getNearestSuspect", k)
+                        TriggerEvent(v.event, k)
                     end
                 },
             }
         }
-
     end
-
-
-    -- position          = vector4(-390.59, -417.2, 25.1, 169.39)
-    -- menus[#menus + 1] = exports['interactionMenu']:Create {
-    --     rotation = vector3(40, 180, -20),
-    --     position = vector4(-390.9, -418.59, 25.17, 167.76), --position,
-    --     scale = 1,
-    --     zone = {
-    --         type = 'boxZone',
-    --         position = position,
-    --         heading = position.w,
-    --         width = 1.0,
-    --         length = 1.0,
-    --         debugPoly = Config.debugPoly,
-    --         minZ = position.z - 1,
-    --         maxZ = position.z + 1,
-    --     },
-    --     options = {
-    --         {
-    --             picture = {
-    --                 url = 'https://static.wikia.nocookie.net/morelife/images/7/7f/LSPD-logo.png/revision/latest?cb=20240305013722&path-prefix=fr',
-    --             }
-    --         },
-    --         {
-    --             label = 'Configurer un bracelet électronique',
-    --             icon = 'fa fa-code',
-    --             action = function(data)
-    --                 RequestAnimDict("anim@heists@prison_heiststation@cop_reactions")
-    --                 while (not HasAnimDictLoaded("anim@heists@prison_heiststation@cop_reactions")) do Wait(0) end
-    --                 TaskPlayAnim(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0, -1.0, 10000, 1, 1, true, true, true)
-    --                 local zoneId = 
-    --                 TriggerEvent("qb-policejob:client:getNearestSuspect", zoneId)
-    --             end
-    --         },
-    --     }
-    -- }
-
-    -- position          = vector4(-385.66, -418.09, 25.1, 177.01)
-    -- menus[#menus + 1] = exports['interactionMenu']:Create {
-    --     rotation = vector3(40, 180, -20), --vector3(-40, 0, 270),
-    --     position = vector4(-386.0, -419.53, 25.06, 167.64), --position,
-    --     scale = 0.8,
-    --     zone = {
-    --         type = 'circleZone',
-    --         position = position,
-    --         radius = 0.8,
-    --         useZ = true,
-    --         debugPoly = Config.debugPoly
-    --     },
-    --     options = {
-    --         {
-    --             picture = {
-    --                 url = 'https://static.wikia.nocookie.net/morelife/images/7/7f/LSPD-logo.png/revision/latest?cb=20240305013722&path-prefix=fr',
-    --             }
-    --         },
-    --         {
-    --             label = 'Configurer un bracelet électronique',
-    --             icon = 'fa fa-code',
-    --             action = function(data)
-    --                 RequestAnimDict("anim@heists@prison_heiststation@cop_reactions")
-    --                 while (not HasAnimDictLoaded("anim@heists@prison_heiststation@cop_reactions")) do Wait(0) end
-    --                 TaskPlayAnim(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0, -1.0, 10000, 1, 1, true, true, true)
-    --                 TriggerEvent("qb-policejob:client:getNearestSuspect")
-    --             end
-    --         },
-    --     }
-    -- }
 end
 
 local function cleanup()
@@ -263,6 +161,10 @@ local function cleanup()
     end
 
     menus = {}
+end
+
+local function DestroyMenu(menu_id)
+    exports['interactionMenu']:remove(menus[menu_id])
 end
 
 exports('handcuffs', function(data, slot)
@@ -298,5 +200,5 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 RegisterNetEvent('qb-policejob:client:showAnkletSuspectInformation', function(suspectPlayerData)
-    SetUpAnklet(suspectPlayerData)
+    SetUpAnkletMenu(suspectPlayerData)
 end)
