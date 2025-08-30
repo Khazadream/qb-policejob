@@ -8,7 +8,7 @@ Config.AnkletSetupLocation = {
         scale = 0.8,
         zone = {
             type = 'circleZone',
-            position = vector4(-385.66, -418.09, 25.1, 177.01),
+            position = vector4(-385.66, -418.09, 24.91, 177.01),
             radius = 0.8,
             useZ = true,
             debugPoly = Config.debugPoly
@@ -17,6 +17,7 @@ Config.AnkletSetupLocation = {
         label = 'Configurer un bracelet électronique',
         icon = 'fa fa-code',
         event = 'qb-policejob:client:getNearestSuspect',
+        deleteOnAction = true,
     },
     [2] = {
         position = vector4(-391.15, -418.59, 25.06, 167.76),
@@ -24,7 +25,7 @@ Config.AnkletSetupLocation = {
         scale = 0.8,
         zone = {
             type = 'circleZone',
-            position = vector4(-390.59, -417.2, 25.1, 169.39),
+            position = vector4(-390.59, -417.2, 24.91, 169.39),
             radius = 0.8,
             useZ = true,
             debugPoly = Config.debugPoly
@@ -33,6 +34,7 @@ Config.AnkletSetupLocation = {
         label = 'Configurer un bracelet électronique',
         icon = 'fa fa-code',
         event = 'qb-policejob:client:getNearestSuspect',
+        deleteOnAction = true,
     },
     [3] = {
         position = vector4(-384.58, -414.83, 25.06, 350.24),
@@ -40,7 +42,7 @@ Config.AnkletSetupLocation = {
         scale = 0.8,
         zone = {
             type = 'circleZone',
-            position = vector4(-385.27, -416.2, 25.1, 351.1),
+            position = vector4(-385.27, -416.2, 24.91, 351.1),
             radius = 0.8,
             useZ = true,
             debugPoly = Config.debugPoly
@@ -49,6 +51,7 @@ Config.AnkletSetupLocation = {
         label = 'Configurer un bracelet électronique',
         icon = 'fa fa-code',
         event = 'qb-policejob:client:getNearestSuspect',
+        deleteOnAction = true,
     },
     [4] = {
         position = vector4(-391.95, -414.88, 25.06, 81.45),
@@ -56,7 +59,7 @@ Config.AnkletSetupLocation = {
         scale = 0.8,
         zone = {
             type = 'circleZone',
-            position = vector4(-390.51, -415.35, 25.1, 82.39),
+            position = vector4(-390.51, -415.35, 24.91, 82.39),
             radius = 0.8,
             useZ = true,
             debugPoly = Config.debugPoly
@@ -65,6 +68,7 @@ Config.AnkletSetupLocation = {
         label = 'Configurer un bracelet électronique',
         icon = 'fa fa-code',
         event = 'qb-policejob:client:getNearestSuspect',
+        deleteOnAction = true,
     },
     [5] = {
         position = vector4(-373.84, -354.75, 48.53, 171.28),
@@ -81,6 +85,7 @@ Config.AnkletSetupLocation = {
         label = 'Traquer un bracelet électronique',
         icon = 'fa fa-code',
         event = 'qb-policejob:client:ankletLocation',
+        deleteOnAction = false,
     },
 }
 
@@ -90,14 +95,17 @@ local function LoadAndPlayAnim()
     TaskPlayAnim(PlayerPedId(), animDictionary, animName, 1.0, -1.0, 10000, 1, 1, true, true, true)
 end
 
-RegisterNetEvent('qb-policejob:client:getNearestSuspect', function()
+RegisterNetEvent('qb-policejob:client:getNearestSuspect', function(index)
+    -- SetUpAnkletMenu()
+
     local player, distance = QBCore.Functions.GetClosestPlayer()
     if player ~= -1 and distance < 2.5 then 
-        LoadAndPlayAnim()
+        --LoadAndPlayAnim()
         local playerId = GetPlayerServerId(player)
         TriggerServerEvent('qb-policejob:server:getSuspectPlayerData', playerId)
     else
         QBCore.Functions.Notify(Lang:t('error.none_nearby'), 'error')
+        CreateInitMenu(index)
     end
 end)
 
@@ -116,10 +124,17 @@ RegisterNetEvent('qb-policejob:client:ankletLocation', function(data)
     })
 
     if anklet ~= nil then
-        --QBCore.Functions.Notify('Vous avez renseigné : '..anklet.citizenid, 'success')
         TriggerServerEvent('qb-policejob:server:ankletlocation', anklet.citizenid)
     else
         QBCore.Functions.Notify('Erreur : CitizenID invalide !', 'error')
     end
+
+end)
+
+RegisterNetEvent('qb-policejob:client:notifySuspect', function()
+
+    QBCore.Functions.Notify('Votre bracelet vibre !', 'primary')
+
+    PlaySound(-1, 'Lose_1st', 'GTAO_FM_Events_Soundset', 0, 0, 1)
 
 end)

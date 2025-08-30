@@ -1,3 +1,5 @@
+local notifySuspect = true -- Set to true to notify and play a song Suspect Client
+
 RegisterNetEvent('qb-policejob:server:getSuspectPlayerData', function(suspectId)
     local src = source
     local suspect = QBCore.Functions.GetPlayer(suspectId)
@@ -16,6 +18,9 @@ RegisterNetEvent('qb-policejob:server:ankletlocation', function(data)
         if not Target then return end
         if Target.PlayerData.metadata["tracker"] then
             TriggerClientEvent("police:client:SendTrackerLocation", Target.PlayerData.source, src)
+            if notifySuspect then
+                TriggerClientEvent("qb-policejob:client:notifySuspect", Target.PlayerData.source)
+            end
         else
             TriggerClientEvent('QBCore:Notify', src, Lang:t("error.no_anklet"), 'error')
         end

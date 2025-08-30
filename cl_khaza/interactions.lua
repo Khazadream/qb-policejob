@@ -1,4 +1,5 @@
 local PlayerHandcuffs = {}
+local actualIndex = 0
 
 local function InitPoliceInteraction()
     print('InitPoliceInteraction')
@@ -71,7 +72,32 @@ local function PrintCell(label, value)
     )
 end
 
-local function SetUpAnkletMenu(suspectPlayerData)
+function CreateInitMenu(index)
+    menus[index] = exports['interactionMenu']:Create {
+        rotation = Config.AnkletSetupLocation[index].rotation,
+        position = Config.AnkletSetupLocation[index].position,
+        scale = Config.AnkletSetupLocation[index].scale,
+        zone = Config.AnkletSetupLocation[index].zone,
+        options = {
+            {
+                picture = {
+                    url = Config.AnkletSetupLocation[index].url,
+                }
+            },
+            {
+                label = Config.AnkletSetupLocation[index].label,
+                icon = Config.AnkletSetupLocation[index].icon,
+                action = function(data)
+                    TriggerEvent(Config.AnkletSetupLocation[index].event, index)
+                    exports['interactionMenu']:remove(menus[index])
+                    actualIndex = index
+                end
+            },
+        }
+    }
+end
+
+function SetUpAnkletMenu(suspectPlayerData)
 
     -- -- Informations
     -- Prénom
@@ -87,13 +113,15 @@ local function SetUpAnkletMenu(suspectPlayerData)
     --local playerData = QBCore.Functions.GetPlayerData()
     local playerData = suspectPlayerData
     local menusIndex = #menus
-    menus[#menus + 1] = exports['interactionMenu']:Create {
-        rotation = vector3(40, 180, -20), --vector3(-40, 0, 270),
-        position = vector4(-386.0, -419.53, 25.06, 167.64), --position,
-        scale = 0.8,
+    local subMenus = {}
+    local index = actualIndex or 1
+    subMenus[index] = exports['interactionMenu']:Create {
+        rotation = Config.AnkletSetupLocation[index].rotation, --vector3(40, 180, -20), --vector3(-40, 0, 270),
+        position = Config.AnkletSetupLocation[index].position, --vector4(-386.0, -419.53, 25.06, 167.64), --position,
+        scale = Config.AnkletSetupLocation[index].scale,
         zone = {
             type = 'circleZone',
-            position = position,
+            position = Config.AnkletSetupLocation[index].zone.position, -- vector4(-385.66, -418.09, 25.1, 177.01),
             radius = 0.8,
             useZ = true,
             debugPoly = Config.debugPoly
@@ -115,12 +143,19 @@ local function SetUpAnkletMenu(suspectPlayerData)
                 label = 'Activer / Désactiver le bracelet électronique',
                 icon = 'fa fa-code',
                 action = function(data)
-                    StopAnimTask(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0)
-                    RequestAnimDict("anim@heists@prison_heiststation@cop_reactions")
-                    while (not HasAnimDictLoaded("anim@heists@prison_heiststation@cop_reactions")) do Wait(0) end
-                    TaskPlayAnim(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0, -1.0, 10000, 1, 1, true, true, true)
                     TriggerEvent("police:client:CheckDistance")
-                    DestroyMenu(menusIndex)
+                    exports['interactionMenu']:remove(subMenus[index])
+                    CreateInitMenu(index)
+                    actualIndex = index
+                end
+            },
+            {
+                label = 'Fermer le menu',
+                icon = 'fa fa-code',
+                action = function(data)
+                    exports['interactionMenu']:remove(subMenus[index])
+                    CreateInitMenu(index)
+                    actualIndex = index
                 end
             },
         }
@@ -148,6 +183,10 @@ local function InitMenuInteraction()
                     icon = v.icon,
                     action = function(data)
                         TriggerEvent(v.event, k)
+                        if v.deleteOnAction then
+                            exports['interactionMenu']:remove(menus[k])
+                        end
+                        actualIndex = k
                     end
                 },
             }
@@ -156,15 +195,15 @@ local function InitMenuInteraction()
 end
 
 local function cleanup()
-    for _, menu_id in ipairs(menus) do
-        exports['interactionMenu']:remove(menu_id)
+    -- for _, menu_id in ipairs(menus) do
+    --     exports['interactionMenu']:remove(menu_id)
+    -- end
+
+    for k, v in pairs(menus) do
+        exports['interactionMenu']:remove(v)
     end
 
     menus = {}
-end
-
-local function DestroyMenu(menu_id)
-    exports['interactionMenu']:remove(menus[menu_id])
 end
 
 exports('handcuffs', function(data, slot)
