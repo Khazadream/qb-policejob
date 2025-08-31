@@ -120,6 +120,13 @@ local Translations = {
         fine_issued = '???',
         received_fine = '???'
  },
+    target = {
+        sign_in = "Sign in",
+        open_personal_stash = "Ouvrir le Casier Personnel",
+        open_trash = "Ouvrir la Poubelle",
+        open_fingerprint = "Ouvrir l'empreinte digitale",
+        open_evidence_stash = "Ouvrir le Coffre des Preuves",
+    },
     evidence = {
         red_hands = 'Mains rouges',
         wide_pupils = 'Pupilles dilatées',
