@@ -1,4 +1,4 @@
-Config.debugZone = true
+Config.debugZone = false
 Config.surveillanceZone = {
     [1] = {coords = vector3(-374.23, -348.9, 48.53), length = 3.05, height = 0.9, heading = 351, minZ = 47.53, maxZ = 49.13},
     --[2] = ,

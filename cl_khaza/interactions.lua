@@ -59,114 +59,6 @@ local function InitPoliceInteraction()
     })
 end
 
-local menus    = {}
-local position = nil
-
-local function PrintCell(label, value)
-    return (
-        '<div style="display: flex; flex-direction: column; gap: 0.5rem; width: 564px;">' ..
-            ('<div style="font-weight: 900; font-family: Helvetica, sans-serif; text-align: left;text-transform: uppercase;">' .. label .. '</div>') ..
-            ('<div style="text-align: left; font-family: Helvetica, sans-serif;font-weight: 200;">' .. value .. '</div>') ..
-        '</div>'
-    )
-end
-
-local function SetUpAnkletMenu(suspectPlayerData)
-
-    -- -- Informations
-    -- Prénom
-    -- Nom
-    -- Date de naissance
-    -- Nationalité
-    -- Citizen ID
-
-    -- -- Bracelets
-    -- Numéro de Bracelet
-    -- Actif / Inactif
-
-    --local playerData = QBCore.Functions.GetPlayerData()
-    local playerData = suspectPlayerData
-    local menusIndex = #menus
-    menus[#menus + 1] = exports['interactionMenu']:Create {
-        rotation = vector3(40, 180, -20), --vector3(-40, 0, 270),
-        position = vector4(-386.0, -419.53, 25.06, 167.64), --position,
-        scale = 0.8,
-        zone = {
-            type = 'circleZone',
-            position = position,
-            radius = 0.8,
-            useZ = true,
-            debugPoly = Config.debugPoly
-        },
-        options = {
-            { label = "MDT Lite", },
-            { label = 'Informations', },
-            { label = PrintCell("Prénom", playerData.charinfo.firstname or 'N/A'), },
-            { label = PrintCell("Nom", playerData.charinfo.lastname or 'N/A'), },
-            { label = PrintCell("Date de naissance", playerData.charinfo.birthdate or 'N/A'), },
-            { label = PrintCell("Nationalité", playerData.charinfo.nationality or 'N/A'), },
-            { label = PrintCell("Citizen ID", playerData.citizenid or 'N/A'), },
-
-            { label = 'Bracelet Electronique', },
-            { label = PrintCell("Numéro de Bracelet", playerData.citizenid or 'N/A'), },
-            { label = PrintCell("Actif", playerData.metadata['tracker'] and 'Oui' or 'Non'), },
-
-            {
-                label = 'Activer / Désactiver le bracelet électronique',
-                icon = 'fa fa-code',
-                action = function(data)
-                    StopAnimTask(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0)
-                    RequestAnimDict("anim@heists@prison_heiststation@cop_reactions")
-                    while (not HasAnimDictLoaded("anim@heists@prison_heiststation@cop_reactions")) do Wait(0) end
-                    TaskPlayAnim(PlayerPedId(), "anim@heists@prison_heiststation@cop_reactions", "cop_b_idle", 1.0, -1.0, 10000, 1, 1, true, true, true)
-                    TriggerEvent("police:client:CheckDistance")
-                    DestroyMenu(menusIndex)
-                end
-            },
-        }
-    }
-end
-
-local function InitMenuInteraction()
-    local job = QBCore.Functions.GetPlayerData().job
-    if job.name ~= 'police' then return end
-
-    for k, v in pairs(Config.AnkletSetupLocation) do
-        menus[k] = exports['interactionMenu']:Create {
-            rotation = v.rotation,
-            position = v.position,
-            scale = v.scale,
-            zone = v.zone,
-            options = {
-                {
-                    picture = {
-                        url = v.url,
-                    }
-                },
-                {
-                    label = v.label,
-                    icon = v.icon,
-                    action = function(data)
-                        TriggerEvent(v.event, k)
-                    end
-                },
-            }
-        }
-    end
-end
-
-local function cleanup()
-    for _, menu_id in ipairs(menus) do
-        exports['interactionMenu']:remove(menu_id)
-    end
-
-    menus = {}
-end
-
-local function DestroyMenu(menu_id)
-    exports['interactionMenu']:remove(menus[menu_id])
-end
-
 exports('handcuffs', function(data, slot)
     TriggerEvent("police:client:CuffPlayerSoft")
 end)
@@ -184,10 +76,9 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 end)
 
 AddEventHandler('onResourceStop', function(resourceName)
-    if (GetCurrentResourceName() ~= resourceName) then
-        
+    if (GetCurrentResourceName() == resourceName) then
+        Cleanup()
     end
-    cleanup()
 end)
 
 RegisterNetEvent('police:client:CuffedPlayers', function(data)

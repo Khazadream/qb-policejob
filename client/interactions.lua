@@ -179,6 +179,7 @@ RegisterNetEvent('police:client:BillPlayer', function()
                 }
             }
         })
+        if dialog == nil then return end
         if tonumber(dialog['bill']) > 0 then
             TriggerServerEvent('police:server:BillPlayer', playerId, tonumber(dialog['bill']))
         else
@@ -219,6 +220,7 @@ RegisterNetEvent('police:client:EscortPlayer', function()
         local playerId = GetPlayerServerId(player)
         if not isHandcuffed and not isEscorted then
             TriggerServerEvent('police:server:EscortPlayer', playerId)
+            isEscorting = not isEscorting
         end
     else
         QBCore.Functions.Notify(Lang:t('error.none_nearby'), 'error')
@@ -407,7 +409,7 @@ local function CreateInstuctionScaleform(scaleform)
     PushScaleformMovieFunction(scaleform, 'SET_DATA_SLOT')
     PushScaleformMovieFunctionParameterInt(1)
     InstructionButton(GetControlInstructionalButton(1, 194, true))
-    InstructionButtonMessage(Lang:t('info.close_camera'))
+    InstructionButtonMessage('Stop escort')
     PopScaleformMovieFunctionVoid()
 
     PushScaleformMovieFunction(scaleform, 'DRAW_INSTRUCTIONAL_BUTTONS')
@@ -441,7 +443,7 @@ CreateThread(function()
         if isEscorting then
             local instructions = CreateInstuctionScaleform('instructional_buttons')
             DrawScaleformMovieFullscreen(instructions, 255, 255, 255, 255, 0)
-            if IsControlJustPressed(1, 177) then
+            if IsControlJustPressed(1, 202) then
                 TriggerEvent("police:client:EscortPlayer")
             end
         end
@@ -489,7 +491,7 @@ CreateThread(function()
                 TaskPlayAnim(PlayerPedId(), 'mp_arresting', 'idle', 8.0, -8, -1, cuffType, 0, 0, 0, 0)
             end
         end
-        if not isHandcuffed and not isEscorted then
+        if not isHandcuffed and not isEscorted and not isEscorting then
             Wait(2000)
         end
     end
