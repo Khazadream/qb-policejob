@@ -29,7 +29,7 @@ QBCore.Commands.Add('grantlicense', Lang:t('commands.license_grant'), { { name =
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.rank_license'), 'error')
     end
-end)
+end, 'god')
 
 QBCore.Commands.Add('revokelicense', Lang:t('commands.license_revoke'), { { name = 'id', help = Lang:t('info.player_id') }, { name = 'license', help = Lang:t('info.license_type') } }, true, function(source, args)
     local src = source
@@ -53,7 +53,7 @@ QBCore.Commands.Add('revokelicense', Lang:t('commands.license_revoke'), { { name
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.rank_revoke'), 'error')
     end
-end)
+end, 'god')
 
 QBCore.Commands.Add('takedrivinglicense', Lang:t('commands.drivinglicense'), {}, false, function(source)
     local src = source
@@ -63,7 +63,7 @@ QBCore.Commands.Add('takedrivinglicense', Lang:t('commands.drivinglicense'), {},
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
-end)
+end, 'god')
 
 -- Interaction
 
@@ -75,12 +75,12 @@ QBCore.Commands.Add('cuff', Lang:t('commands.cuff_player'), {}, false, function(
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
-end)
+end, 'god')
 
 QBCore.Commands.Add('escort', Lang:t('commands.escort'), {}, false, function(source)
     local src = source
     TriggerClientEvent('police:client:EscortPlayer', src)
-end)
+end, 'god')
 
 QBCore.Commands.Add('callsign', Lang:t('commands.callsign'), { { name = 'name', help = Lang:t('info.callsign_name') } }, false, function(source, args)
     local src = source
@@ -96,7 +96,7 @@ QBCore.Commands.Add('jail', Lang:t('commands.jail_player'), {}, false, function(
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
-end)
+end, 'god')
 
 QBCore.Commands.Add('unjail', Lang:t('commands.unjail_player'), { { name = 'id', help = Lang:t('info.player_id') } }, true, function(source, args)
     local src = source
@@ -107,17 +107,7 @@ QBCore.Commands.Add('unjail', Lang:t('commands.unjail_player'), { { name = 'id',
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
-end)
-
-QBCore.Commands.Add('seizecash', Lang:t('commands.seizecash'), {}, false, function(source)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if Player.PlayerData.job.type == 'leo' and Player.PlayerData.job.onduty then
-        TriggerClientEvent('police:client:SeizeCash', src)
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
-    end
-end)
+end, 'god')
 
 QBCore.Commands.Add('sc', Lang:t('commands.softcuff'), {}, false, function(source)
     local src = source
@@ -127,7 +117,7 @@ QBCore.Commands.Add('sc', Lang:t('commands.softcuff'), {}, false, function(sourc
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
-end)
+end, 'god')
 
 QBCore.Commands.Add('fine', Lang:t('commands.fine'), { { name = 'id', help = Lang:t('info.player_id') }, { name = 'amount', help = Lang:t('info.amount') } }, false, function(source, args)
     local biller = QBCore.Functions.GetPlayer(source)
@@ -220,7 +210,7 @@ QBCore.Commands.Add('anklet', Lang:t('commands.anklet'), {}, false, function(sou
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
-end)
+end, 'god')
 
 QBCore.Commands.Add('ankletlocation', Lang:t('commands.ankletlocation'), { { name = 'cid', help = Lang:t('info.citizen_id') } }, true, function(source, args)
     local src = source
@@ -237,7 +227,7 @@ QBCore.Commands.Add('ankletlocation', Lang:t('commands.ankletlocation'), { { nam
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
-end)
+end, 'god')
 
 -- Vehicle
 
@@ -272,45 +262,6 @@ QBCore.Commands.Add('cam', Lang:t('commands.camera'), { { name = 'camid', help =
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
     end
 end, 'god')
-
-QBCore.Commands.Add('paytow', Lang:t('commands.paytow'), { { name = 'id', help = Lang:t('info.player_id') } }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if Player.PlayerData.job.type == 'leo' and Player.PlayerData.job.onduty then
-        local playerId = tonumber(args[1])
-        local OtherPlayer = QBCore.Functions.GetPlayer(playerId)
-        if OtherPlayer then
-            if OtherPlayer.PlayerData.job.name == 'tow' then
-                OtherPlayer.Functions.AddMoney('bank', 500, 'police-tow-paid')
-                TriggerClientEvent('QBCore:Notify', OtherPlayer.PlayerData.source, Lang:t('success.tow_paid'), 'success')
-                TriggerClientEvent('QBCore:Notify', src, Lang:t('info.tow_driver_paid'))
-            else
-                TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_towdriver'), 'error')
-            end
-        end
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
-    end
-end)
-
-QBCore.Commands.Add('paylawyer', Lang:t('commands.paylawyer'), { { name = 'id', help = Lang:t('info.player_id') } }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if Player.PlayerData.job.type == 'leo' or Player.PlayerData.job.name == 'judge' then
-        local playerId = tonumber(args[1])
-        local OtherPlayer = QBCore.Functions.GetPlayer(playerId)
-        if not OtherPlayer then return end
-        if OtherPlayer.PlayerData.job.name == 'lawyer' then
-            OtherPlayer.Functions.AddMoney('bank', 500, 'police-lawyer-paid')
-            TriggerClientEvent('QBCore:Notify', OtherPlayer.PlayerData.source, Lang:t('success.tow_paid'), 'success')
-            TriggerClientEvent('QBCore:Notify', src, Lang:t('info.paid_lawyer'))
-        else
-            TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_lawyer'), 'error')
-        end
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.on_duty_police_only'), 'error')
-    end
-end)
 
 QBCore.Commands.Add('911p', Lang:t('commands.police_report'), { { name = 'message', help = Lang:t('commands.message_sent') } }, false, function(source, args)
     local src = source
