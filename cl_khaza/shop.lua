@@ -92,7 +92,7 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 end)
 
 AddEventHandler('onResourceStop', function(resourceName)
-    if (GetCurrentResourceName() ~= resourceName) then
+    if (GetCurrentResourceName() == resourceName) then
         DeleteShopPed()
     end
 end)
