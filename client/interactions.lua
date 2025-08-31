@@ -179,6 +179,7 @@ RegisterNetEvent('police:client:BillPlayer', function()
                 }
             }
         })
+        if dialog == nil then return end
         if tonumber(dialog['bill']) > 0 then
             TriggerServerEvent('police:server:BillPlayer', playerId, tonumber(dialog['bill']))
         else
