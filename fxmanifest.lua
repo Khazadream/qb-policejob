@@ -9,7 +9,8 @@ shared_scripts {
 	'config.lua',
 	'@qb-core/shared/locale.lua',
 	'locales/en.lua',
-	'locales/*.lua'
+	'locales/*.lua',
+	'@ox_lib/init.lua'
 }
 
 client_scripts {
@@ -26,7 +27,7 @@ client_scripts {
 	'client/objects.lua',
 	'client/tracker.lua',
 	'cl_khaza/shop.lua',
-	'cl_khaza/surveillance.lua',
+	--'cl_khaza/surveillance.lua',
 	'cl_khaza/spikes.lua',
 	'cl_khaza/interactions.lua',
 	'cl_khaza/anklet.lua'
