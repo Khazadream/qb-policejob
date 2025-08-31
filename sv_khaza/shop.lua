@@ -19,11 +19,16 @@ local function RegisterOxShop()
             -- TODO: Weapon
             { name = 'WEAPON_STUNGUN', price = 0 },
             { name = 'WEAPON_NIGHTSTICK', price = 0 },
-            { name = 'WEAPON_STUNGUN', price = 0 },
             { name = 'WEAPON_FLASHLIGHT', price = 0 },
+            { name = 'WEAPON_COMBATPISTOL', price = 0, metadata = { components = {'at_flashlight' } } },
             { name = "WEAPON_SMG", price = 0, metadata = { components = {'at_flashlight', 'at_scope_macro' } }},
             { name = "WEAPON_PUMPSHOTGUN", price = 0, metadata = { components = {'at_flashlight' } }},
             { name = "WEAPON_CARBINERIFLE", price = 0, metadata = { components = {'at_flashlight', 'at_scope_medium' } }},
+            -- TODO: Ammo
+            { name = 'ammo-9', price = 0 },
+            { name = 'ammo-rifle', price = 0 },
+            { name = 'ammo-shotgun', price = 0 },
+            { name = 'ammo-rifle', price = 0 },
         },
     })
 end
