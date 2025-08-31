@@ -11,6 +11,8 @@ local function RegisterOxShop()
             { name = 'spikes', price = 0 },
             { name = 'spray_remover', price = 0 },
             { name = 'handcuffs', price = 0 },
+            { name = 'empty_evidence_bag', price = 0 },
+            { name = 'swatmask', price = 0 },
             -- Weapon
             { name = "WEAPON_POCKETLIGHT", price = 0, image = 'uvtorch.png', metadata = { label = 'Lampe à UV', components = {"plight_uv" } }},
             { name = 'toolbox_weapon_analysis', price = 0 },
@@ -28,7 +30,6 @@ local function RegisterOxShop()
             { name = 'ammo-9', price = 0 },
             { name = 'ammo-rifle', price = 0 },
             { name = 'ammo-shotgun', price = 0 },
-            { name = 'ammo-rifle', price = 0 },
         },
     })
 end
