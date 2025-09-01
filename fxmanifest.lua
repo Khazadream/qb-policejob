@@ -46,7 +46,8 @@ server_scripts {
 	'server/vehicle.lua',
 	'sv_khaza/shop.lua',
 	'sv_khaza/spikes.lua',
-	'sv_khaza/anklet.lua'
+	'sv_khaza/anklet.lua',
+	'sv_khaza/search.lua'
 }
 
 ui_page 'html/index.html'

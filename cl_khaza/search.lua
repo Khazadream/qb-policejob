@@ -21,8 +21,8 @@ RegisterNetEvent('qb-policejob:client:PlayerSearch', function()
             local plyCoords = GetEntityCoords(playerPed)
             local pos = GetEntityCoords(ped)
             if #(pos - plyCoords) < 2.5 then
-                exports.ox_inventory:openInventory('player', playerId)
-                --TriggerServerEvent('qb-policejob:server:PlayerSearch', playerId)
+                --exports.ox_inventory:openInventory('player', playerId)
+                TriggerServerEvent("qb-policejob:server:PlayerSearch", playerId)
             else
                 QBCore.Functions.Notify(Lang:t('error.none_nearby'), 'error')
             end
