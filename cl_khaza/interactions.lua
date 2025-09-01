@@ -46,14 +46,24 @@ local function InitPoliceInteraction()
             },
             {
                 type = "client",
-                event = "police:client:BillPlayer",
-                icon = "fas fa-money-bill-wave",
-                label = "Amender",
+                event = "qb-policejob:client:PlayerSearch",
+                icon = "fas fa-people-robbery",
+                label = "Fouiller",
                 canInteract = function(entity)
                     return IsPedAPlayer(entity)
                 end,
-                job = 'police',
-            }
+                --job = 'police',
+            },
+            -- {
+            --     type = "client",
+            --     event = "police:client:BillPlayer",
+            --     icon = "fas fa-money-bill-wave",
+            --     label = "Amender",
+            --     canInteract = function(entity)
+            --         return IsPedAPlayer(entity)
+            --     end,
+            --     job = 'police',
+            -- }
         },
         distance = 2.5
     })
