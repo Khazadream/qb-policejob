@@ -64,7 +64,8 @@ local function InitPoliceInteraction()
                 end,
                 action = function(entity)
                     print("entity: ", entity)
-                    local pid = NetworkGetNetworkIdFromEntity(entity)
+                    --local netId = NetworkGetNetworkIdFromEntity(entity)
+                    local pid = GetPlayerServerId(entity)
                     print("pid: ", pid)
                     TriggerEvent('evange-billing:client:CreateBilling', { playerId = pid })
                 end,
