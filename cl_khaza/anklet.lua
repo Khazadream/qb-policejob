@@ -212,10 +212,14 @@ end
 
 function Cleanup()
     for k, v in pairs(menus) do
-        exports['interactionMenu']:remove(v)
+        if v then
+            exports['interactionMenu']:remove(v)
+        end
     end
     for k, v in pairs(subMenus) do
-        exports['interactionMenu']:remove(v)
+        if v then
+            exports['interactionMenu']:remove(v)
+        end
     end
 end
 

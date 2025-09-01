@@ -30,7 +30,8 @@ client_scripts {
 	--'cl_khaza/surveillance.lua',
 	'cl_khaza/spikes.lua',
 	'cl_khaza/interactions.lua',
-	'cl_khaza/anklet.lua'
+	'cl_khaza/anklet.lua',
+	'cl_khaza/search.lua'
 }
 
 server_scripts {
