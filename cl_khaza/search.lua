@@ -1,3 +1,16 @@
+local function IsTargetDead(playerId)
+    local retval = false
+    local hasReturned = false
+    QBCore.Functions.TriggerCallback('police:server:isPlayerDead', function(result)
+        retval = result
+        hasReturned = true
+    end, playerId)
+    while not hasReturned do
+        Wait(10)
+    end
+    return retval
+end
+
 RegisterNetEvent('qb-policejob:client:PlayerSearch', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
     local ped = PlayerPedId()
