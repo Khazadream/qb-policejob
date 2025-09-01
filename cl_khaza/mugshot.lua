@@ -36,9 +36,6 @@ local function DestroyMugshotZones()
     end
 end
 
-
-
-
 local cam = nil
 
 local function StopCam()
@@ -92,26 +89,6 @@ end
 
 RegisterNetEvent('qb-policejob:client:setupMugshotCamera', function()
     SetupCamera()
-
-
-
-
-    -- local mugshot = exports['qb-input']:ShowInput({
-    --     header = "Mugshot",
-    --     submitText = "Prendre",
-    --     inputs = {
-    --         {
-    --             text = "Numero du suspect",
-    --             name = "mugshotNum",
-    --             type = "number",
-    --             isRequired = true,
-    --             default = 0,
-    --         }
-    --     }
-    -- })
-    -- if mugshot ~= nil then
-    --     TriggerEvent('police:client:ActiveMugshot', tonumber(mugshot.mugshotNum))
-    -- end
 end)
 
 AddEventHandler('onResourceStart', function(resourceName)
@@ -124,4 +101,12 @@ AddEventHandler('onResourceStop', function(resourceName)
     if (GetCurrentResourceName() == resourceName) then
         DestroyMugshotZones()
     end
+end)
+
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+    GenerateMugshotZones()
+end)
+
+RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    DestroyMugshotZones()
 end)
