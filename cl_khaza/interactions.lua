@@ -54,16 +54,22 @@ local function InitPoliceInteraction()
                 end,
                 --job = 'police',
             },
-            -- {
-            --     type = "client",
-            --     event = "police:client:BillPlayer",
-            --     icon = "fas fa-money-bill-wave",
-            --     label = "Amender",
-            --     canInteract = function(entity)
-            --         return IsPedAPlayer(entity)
-            --     end,
-            --     job = 'police',
-            -- }
+            {
+                --type = "client",
+                --event = "police:client:BillPlayer",
+                icon = "fas fa-money-bill-wave",
+                label = "Amender",
+                canInteract = function(entity)
+                    return IsPedAPlayer(entity)
+                end,
+                action = function(entity)
+                    print("entity: ", entity)
+                    local pid = GetPlayerServerId(entity)
+                    print("pid: ", pid)
+                    TriggerEvent('evange-billing:client:CreateBilling', { playerId = pid })
+                end,
+                job = 'police',
+            }
         },
         distance = 2.5
     })
