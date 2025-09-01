@@ -48,10 +48,8 @@ local function StopCam()
     TriggerEvent('set-hud-visible', true)
 end
 
-local photoTaken = false
 local isTakingPhoto = false
 local function TakePhoto()
-    photoTaken = true
     exports['qb-core']:HideText()
     RegisterPhoto()
     StopCam()
@@ -83,9 +81,8 @@ local function SetupCamera()
 
     -- Security Time Out
     SetTimeout(10000, function()
-        isTakingPhoto = false
-        if not photoTaken then
-            photoTaken = true
+        if isTakingPhoto then
+            isTakingPhoto = false
             exports['qb-core']:HideText()
             StopCam()
             exports['qb-core']:Notify('Temps d\'expiration de la photo', 'error')
