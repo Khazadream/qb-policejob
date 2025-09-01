@@ -2,7 +2,7 @@ Config.mugshotZone = {
     [1] = {
         coords = vector3(-388.55, -387.01, 25.1), length = 0.25, height = 0.25, heading = 350, minZ = 24.9, maxZ = 25.2, 
         cameraPos = vector3(-392.45, -386.84, 25.8),--vector3(-392.24, -386.74, 25.9),  vector4(-392.45, -386.84, 25.1, 81.5)
-        cameraRot = vector3(0, 0, 81.5),--vector3(0, 0, 79.72)
+        cameraRot = vector3(0, 0, 79.72),--vector3(0, 0, 79.72)
     },
     --[2] = ,
 }
