@@ -55,18 +55,13 @@ local function InitPoliceInteraction()
                 --job = 'police',
             },
             {
-                --type = "client",
-                --event = "police:client:BillPlayer",
                 icon = "fas fa-money-bill-wave",
                 label = "Amender",
                 canInteract = function(entity)
                     return IsPedAPlayer(entity)
                 end,
                 action = function(entity)
-                    print("entity: ", entity)
-                    --local netId = NetworkGetNetworkIdFromEntity(entity)
                     local pid = GetPlayerServerId(NetworkGetPlayerIndexFromPed(entity))
-                    print("pid: ", pid)
                     TriggerEvent('evange-billing:client:CreateBilling', { playerId = pid })
                 end,
                 job = 'police',
