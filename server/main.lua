@@ -193,6 +193,7 @@ RegisterNetEvent('police:server:showFingerprintId', function(sessionId)
     local fid = Player.PlayerData.metadata['fingerprint']
     TriggerClientEvent('police:client:showFingerprintId', sessionId, fid)
     TriggerClientEvent('police:client:showFingerprintId', src, fid)
+    TriggerClientEvent('qb-policejob:client:registerFingerPrint', sessionId, Player.PlayerData.citizenid, fid)
 end)
 
 RegisterNetEvent('police:server:SetTracker', function(targetId)
