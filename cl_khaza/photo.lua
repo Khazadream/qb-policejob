@@ -13,7 +13,12 @@ function RegisterPhoto()
         if resp then
             local imageURL = resp.data.url or nil
             TriggerServerEvent('qb-log:server:CreateLog', 'photos', "**New Screenshot**", 16753920, imageURL, false, imageURL)
-            TriggerEvent("evange-core:client:robbery:create-photo", imageURL)
+            local citizenID = suspectMugshotId
+            TriggerServerEvent("evange-core:server:mdt:set-profile", citizenID, imageURL)
+
+            --local year, month, day, hour, minute, second = GetLocalTime()
+            --local localTime = day..'/'..month..'/'..year..'  '..hour..':'..minute..':'..second
+            --TriggerEvent("evange-core:client:robbery:create-photo", imageURL, localTime)
             --TriggerEvent("evange-core:client:robbery:create-photo", imageURL, os.date('%Y-%m-%d %H:%M:%S'))
         end
     end)

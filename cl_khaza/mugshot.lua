@@ -1,11 +1,16 @@
+local suspectMugshotZone
+local insideSuspectZone = nil
+suspectMugshotCitizenId = nil
 Config.mugshotZone = {
     [1] = {
         coords = vector3(-388.55, -387.01, 25.1), length = 0.25, height = 0.25, heading = 350, minZ = 24.9, maxZ = 25.2, 
-        cameraPos = vector3(-392.45, -386.84, 25.8),--vector3(-392.24, -386.74, 25.9),  vector4(-392.45, -386.84, 25.1, 81.5)
+        cameraPos = vector3(-392.05, -386.93, 25.6),--vector3(-392.45, -386.84, 25.8),--vector3(-392.24, -386.74, 25.9),  vector4(-392.45, -386.84, 25.1, 81.5)
         cameraRot = vector3(0, 0, 79.72),--vector3(0, 0, 79.72)
     },
     --[2] = ,
 }
+
+Config.suspectMugshotZone = { coords = vector3(-391.13, -387.22, 25.1), length = 3.4, height = 4.4, heading = 350, minZ = 24.1, maxZ = 27.1 }
 
 local function GenerateMugshotZones()
     for k, v in pairs(Config.mugshotZone) do
@@ -28,6 +33,20 @@ local function GenerateMugshotZones()
         distance = 1.5
         })
     end
+
+    suspectMugshotZone = BoxZone:Create(Config.suspectMugshotZone.coords, Config.suspectMugshotZone.length, Config.suspectMugshotZone.height, {
+        name = "mugshotBoxZone",
+        heading = Config.suspectMugshotZone.heading,
+        --debugPoly = true,
+        minZ = Config.suspectMugshotZone.minZ,
+        maxZ = Config.suspectMugshotZone.maxZ
+    })
+
+    suspectMugshotZone:onPlayerInOut(function(isPointInside, point)
+        insideSuspectZone = isPointInside
+        TriggerServerEvent("qb-policejob:server:mugshotZoneRef")
+    end)
+
 end
 
 local function DestroyMugshotZones()
@@ -47,13 +66,13 @@ end
 
 local isTakingPhoto = false
 local function TakePhoto()
-    exports['qb-core']:HideText()
+    --exports['qb-core']:HideText()
     RegisterPhoto()
     StopCam()
     exports['qb-core']:Notify('Photo prise avec succès', 'success')
 end
 
-local function SetupCamera()
+local function SetupCamera(isOfficer)
     cam = CreateCam("DEFAULT_SCRIPTED_CAMERA", 1)
     local pos = Config.mugshotZone[1].cameraPos
     local rot = Config.mugshotZone[1].cameraRot
@@ -64,15 +83,22 @@ local function SetupCamera()
     --AnimpostfxPlay('HeistCelebEnd', 30000, true)
     TriggerEvent('set-hud-visible', false)
     isTakingPhoto = true
-    exports['qb-core']:DrawText('E - Prendre une photo', 'left')
+    --exports['qb-core']:DrawText('E - Prendre une photo', 'left')
 
-    CreateThread(function()
-        while isTakingPhoto do
-            Wait(0)
-            if IsControlJustPressed(0, 38) then
-                isTakingPhoto = false
-                TakePhoto()
-            end
+    -- CreateThread(function()
+    --     while isTakingPhoto do
+    --         Wait(0)
+    --         if IsControlJustPressed(0, 38) then
+    --             isTakingPhoto = false
+    --             TakePhoto()
+    --         end
+    --     end
+    -- end)
+
+    SetTimeout(5000, function()
+        if isOfficer then
+            RegisterPhoto()
+            exports['qb-core']:Notify('Photo prise avec succès', 'success')
         end
     end)
 
@@ -80,15 +106,26 @@ local function SetupCamera()
     SetTimeout(10000, function()
         if isTakingPhoto then
             isTakingPhoto = false
-            exports['qb-core']:HideText()
+            --exports['qb-core']:HideText()
             StopCam()
-            exports['qb-core']:Notify('Temps d\'expiration de la photo', 'error')
+            --exports['qb-core']:Notify('Temps d\'expiration de la photo', 'error')
         end
     end)
 end
 
 RegisterNetEvent('qb-policejob:client:setupMugshotCamera', function()
-    SetupCamera()
+    --SetupCamera()
+    TriggerServerEvent("qb-policejob:server:getSuspectMugshotId")
+end)
+
+RegisterNetEvent('qb-policejob:client:getSuspectMugshotId', function(SuspectId, SuspectCitizenID)
+    SetupCamera(true)
+    suspectMugshotCitizenId = SuspectCitizenID
+    TriggerServerEvent("kael-mugshot:server:takemugshot", SuspectId)
+end)
+
+RegisterNetEvent('qb-policejob:client:suspectMugshotCamSetup', function(SuspectId, SuspectCitizenID)
+    SetupCamera(false)
 end)
 
 AddEventHandler('onResourceStart', function(resourceName)
