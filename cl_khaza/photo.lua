@@ -13,7 +13,7 @@ function RegisterPhoto()
         if resp then
             local imageURL = resp.data.url or nil
             TriggerServerEvent('qb-log:server:CreateLog', 'photos', "**New Screenshot**", 16753920, imageURL, false, imageURL)
-            local citizenID = suspectMugshotId
+            local citizenID = suspectMugshotCitizenId
             TriggerServerEvent("evange-police:server:mdt:set-profile", citizenID, imageURL)
 
             --local year, month, day, hour, minute, second = GetLocalTime()
