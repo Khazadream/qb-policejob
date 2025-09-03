@@ -54,7 +54,7 @@ end
 local function GetBackCloth()
     local playerPed = PlayerPedId()
     TriggerServerEvent('qb-clothes:loadPlayerSkin')
-    --TriggerServerEvent('rcore_clothing:reloadSkin')
+    TriggerServerEvent('rcore_clothing:reloadSkin')
 end
 
 local function InitClothObject()
@@ -66,7 +66,7 @@ local function InitClothObject()
         options = {
             {
                 num = 1,
-                icon = "fas fa-cloth",
+                icon = "fas fa-shirt",
                 label = "Enfiler la tenue",
                 action = function()
                     ApplyDetentionCloth()
@@ -78,7 +78,7 @@ local function InitClothObject()
             },
             {
                 num = 2,
-                icon = "fas fa-cloth",
+                icon = "fas fa-shirt",
                 label = "Retirer la tenue",
                 action = function()
                     GetBackCloth()
