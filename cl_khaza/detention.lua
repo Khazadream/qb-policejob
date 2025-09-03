@@ -13,6 +13,7 @@ Config.Uniforms ={
 			['pants'] = {item = 3, texture = 7},
 			['shoes'] = {item = 1, texture = 0},
             ['mask'] = {item = 0, texture = 0},
+            ['hat'] = {item = 0, texture = 0},
         }
     },
     ['female'] = {
@@ -23,6 +24,7 @@ Config.Uniforms ={
 			['pants'] = {item = 0, texture = 12},
 			['shoes'] = {item = 1, texture = 0},
             ['mask'] = {item = 0, texture = 0},
+            ['hat'] = {item = 0, texture = 0},
         }
     },
 }
