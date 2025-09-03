@@ -67,7 +67,7 @@ end
 local isTakingPhoto = false
 local function TakePhoto()
     --exports['qb-core']:HideText()
-    RegisterPhoto()
+    RegisterPhoto(suspectMugshotCitizenId)
     StopCam()
     exports['qb-core']:Notify('Photo prise avec succès', 'success')
 end
@@ -97,7 +97,7 @@ local function SetupCamera(isOfficer)
 
     SetTimeout(5000, function()
         if isOfficer then
-            RegisterPhoto()
+            RegisterPhoto(suspectMugshotCitizenId)
             exports['qb-core']:Notify('Photo prise avec succès', 'success')
         end
     end)
