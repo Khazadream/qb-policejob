@@ -32,7 +32,8 @@ local function ChangeSecurityCamera(x, y, z, r, cameraId)
         local playerPed = PlayerPedId()
         local x, y, z = table.unpack(GetEntityCoords(playerPed))
 
-        local streetHash, crossingHash = GetStreetNameAtCoord(x, y, z)
+        -- local streetHash, crossingHash = GetStreetNameAtCoord(x, y, z)
+        local streetHash, crossingHash = GetStreetNameAtCoord(r.x, r.y, r.z)
         local streetName = GetStreetNameFromHashKey(streetHash)
         local crossingName = GetStreetNameFromHashKey(crossingHash)
 
