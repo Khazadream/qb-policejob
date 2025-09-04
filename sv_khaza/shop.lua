@@ -3,11 +3,12 @@ local function RegisterOxShop()
         name = 'Police Shop',
         inventory = {
             -- 
-            { name = 'testplaceable', price = 0, metadata = {label = 'Carton', propName = 'prop_mp_arrow_barrier_01'} },
-            { name = 'testplaceable', price = 0, metadata = {label = 'Cone de circulation', propName = 'prop_barrier_work05'} },
-            { name = 'testplaceable', price = 0, metadata = {label = 'Barrière', propName = 'prop_barrier_work06a'} },
-            { name = 'testplaceable', price = 0, metadata = {label = 'Barrière', propName = 'prop_mp_barrier_02b'} },
-            { name = 'testplaceable', price = 0, metadata = {label = 'Barrière', propName = 'xm3_prop_xm3_road_barrier_01a'} },
+            { name = 'testplaceable', price = 0, metadata = {label = 'Cone de circulation', propName = 'm25_1_int_01_cone_02'} },
+            { name = 'testplaceable', price = 0, metadata = {label = 'Barrière flêche', propName = 'prop_mp_arrow_barrier_01'} },
+            { name = 'testplaceable', price = 0, metadata = {label = 'Barrière bleu', propName = 'prop_barrier_work05'} },
+            { name = 'testplaceable', price = 0, metadata = {label = 'Barrière blanche', propName = 'prop_barrier_work06a'} },
+            { name = 'testplaceable', price = 0, metadata = {label = 'Barrière route', propName = 'prop_mp_barrier_02b'} },
+            { name = 'testplaceable', price = 0, metadata = {label = 'Barrière route fermé', propName = 'xm3_prop_xm3_road_barrier_01a'} },
             { name = 'spikes', price = 0 },
             { name = 'spray_remover', price = 0 },
             { name = 'handcuffs', price = 0 },
