@@ -35,7 +35,8 @@ client_scripts {
 	'cl_khaza/mugshot.lua',
 	'cl_khaza/photo.lua',
 	'cl_khaza/fingerprint.lua',
-	'cl_khaza/detention.lua'
+	'cl_khaza/detention.lua',
+	'cl_khaza/alerts.lua'
 }
 
 server_scripts {
