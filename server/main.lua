@@ -5,20 +5,21 @@ local updatingCops = false
 -- Functions
 
 local function UpdateBlips()
-    local dutyPlayers = {}
+    local trackedPlayers = {}
     local players = QBCore.Functions.GetQBPlayers()
     for i = 1, #players do
         local v = players[i]
         --if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
-        if v and bippersActive[v.PlayerData.source] and bippersActive[v.PlayerData.source].isActive then
+        local sourceStr = tostring(v.PlayerData.source)
+        if v and BIPPERS_ACTIVE[sourceStr] and BIPPERS_ACTIVE[sourceStr].isActive then
             local coords = GetEntityCoords(GetPlayerPed(v.PlayerData.source))
             local heading = GetEntityHeading(GetPlayerPed(v.PlayerData.source))
-            dutyPlayers[#dutyPlayers + 1] = {
+            trackedPlayers[#trackedPlayers + 1] = {
                 source = v.PlayerData.source,
                 --label = v.PlayerData.metadata['callsign'],
-                label = bippersActive[v.PlayerData.source].callsign,
+                label = BIPPERS_ACTIVE[sourceStr].callsign or "99",
                 --job = v.PlayerData.job.name,
-                job = "police",
+                --job = "police",
                 location = {
                     x = coords.x,
                     y = coords.y,
@@ -28,7 +29,7 @@ local function UpdateBlips()
             }
         end
     end
-    TriggerClientEvent('police:client:UpdateBlips', -1, dutyPlayers)
+    TriggerClientEvent('police:client:UpdateBlips', -1, trackedPlayers)
 end
 
 local function GetCurrentCops()

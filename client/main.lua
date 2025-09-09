@@ -109,6 +109,7 @@ RegisterNetEvent('QBCore:Client:SetDuty', function(newDuty)
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
+    print(json.encode(JobInfo, {indent=true}))
     if JobInfo.type ~= 'leo' then
         if DutyBlips then
             for _, v in pairs(DutyBlips) do
@@ -138,6 +139,8 @@ RegisterNetEvent('police:client:sendBillingMail', function(amount)
 end)
 
 RegisterNetEvent('police:client:UpdateBlips', function(players)
+    print("PoliceJob updateBlips", json.encode(players, {indent=true}))
+    print("PoliceJob updateBlips", json.encode(PlayerJob, {indent=true}))
     if PlayerJob and (PlayerJob.type == 'leo' or PlayerJob.type == 'ems') and
         PlayerJob.onduty then
         if DutyBlips then

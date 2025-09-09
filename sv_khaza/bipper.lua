@@ -1,24 +1,25 @@
-bippersActive = {}
+BIPPERS_ACTIVE = {}
 
 
 local function ToggleBippers(source, callsign)
-
-    if not bippersActive[source] then
-        bippersActive[source] = {}
-        bippersActive[source].isActive = false
-        bippersActive[source].callsign = callsign
+    local sourceStr = tostring(source)
+    if not BIPPERS_ACTIVE[sourceStr] then
+        BIPPERS_ACTIVE[sourceStr] = {}
+        BIPPERS_ACTIVE[sourceStr].isActive = false
+        BIPPERS_ACTIVE[sourceStr].callsign = callsign
     end
 
-    bippersActive[source].isActive = not bippersActive[source].isActive
-    bippersActive[source].callsign = callsign
+    BIPPERS_ACTIVE[sourceStr].isActive = not BIPPERS_ACTIVE[sourceStr].isActive
+    BIPPERS_ACTIVE[sourceStr].callsign = callsign
 end
 
 local function SetBippers(source, state)
-    if not bippersActive[source] then
-        bippersActive[source] = {}
-        bippersActive[source].isActive = state
+    local sourceStr = tostring(source)
+    if not BIPPERS_ACTIVE[sourceStr] then
+        BIPPERS_ACTIVE[sourceStr] = {}
+        BIPPERS_ACTIVE[sourceStr].isActive = state
     else
-        bippersActive[source].isActive = state
+        BIPPERS_ACTIVE[sourceStr].isActive = state
     end
 end
 
