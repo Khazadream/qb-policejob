@@ -9,13 +9,16 @@ local function UpdateBlips()
     local players = QBCore.Functions.GetQBPlayers()
     for i = 1, #players do
         local v = players[i]
-        if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
+        --if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
+        if v and bippersActive[v.PlayerData.source] and bippersActive[v.PlayerData.source].isActive then
             local coords = GetEntityCoords(GetPlayerPed(v.PlayerData.source))
             local heading = GetEntityHeading(GetPlayerPed(v.PlayerData.source))
             dutyPlayers[#dutyPlayers + 1] = {
                 source = v.PlayerData.source,
-                label = v.PlayerData.metadata['callsign'],
-                job = v.PlayerData.job.name,
+                --label = v.PlayerData.metadata['callsign'],
+                label = bippersActive[v.PlayerData.source].callsign,
+                --job = v.PlayerData.job.name,
+                job = "police",
                 location = {
                     x = coords.x,
                     y = coords.y,

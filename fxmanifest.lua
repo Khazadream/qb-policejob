@@ -36,7 +36,8 @@ client_scripts {
 	'cl_khaza/photo.lua',
 	'cl_khaza/fingerprint.lua',
 	'cl_khaza/detention.lua',
-	'cl_khaza/alerts.lua'
+	'cl_khaza/alerts.lua',
+	'cl_khaza/bipper.lua'
 }
 
 server_scripts {
@@ -51,7 +52,8 @@ server_scripts {
 	'sv_khaza/spikes.lua',
 	'sv_khaza/anklet.lua',
 	'sv_khaza/search.lua',
-	'sv_khaza/mugshot.lua'
+	'sv_khaza/mugshot.lua',
+	'sv_khaza/bipper.lua'
 }
 
 ui_page 'html/index.html'
