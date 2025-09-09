@@ -45,7 +45,7 @@ local function UpdateBlips()
             if coords and heading then
                 trackedPlayers[#trackedPlayers + 1] = {
                     source = source,
-                    label = v.callsign,
+                    label = v.callsign or '99',
                     job = 'police',
                     charinfo = player.PlayerData.charinfo,
                     location = {

@@ -7,35 +7,71 @@ PlayerJob = {}
 local DutyBlips = {}
 
 -- Functions
-local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
-    local ped = GetPlayerPed(playerId)
-    local blip = GetBlipFromEntity(ped)
-    if not DoesBlipExist(blip) then
-        if NetworkIsPlayerActive(playerId) then
-            blip = AddBlipForEntity(ped)
-        else
-            blip = AddBlipForCoord(playerLocation.x, playerLocation.y, playerLocation.z)
-        end
-        SetBlipSprite(blip, 1)
-        ShowHeadingIndicatorOnBlip(blip, true)
-        SetBlipRotation(blip, math.ceil(playerLocation.w))
-        SetBlipScale(blip, 1.0)
-        if playerJob == 'police' then
-            SetBlipColour(blip, 38)
-        else
-            SetBlipColour(blip, 5)
-        end
-        SetBlipAsShortRange(blip, true)
-        BeginTextCommandSetBlipName('STRING')
-        AddTextComponentSubstringPlayerName(playerLabel)
-        EndTextCommandSetBlipName(blip)
-        DutyBlips[#DutyBlips + 1] = blip
-    end
+-- local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
+--     local ped = GetPlayerPed(playerId)
+--     local blip = GetBlipFromEntity(ped)
+--     if not DoesBlipExist(blip) then
+--         if NetworkIsPlayerActive(playerId) then
+--             blip = AddBlipForEntity(ped)
+--         else
+--             blip = AddBlipForCoord(playerLocation.x, playerLocation.y, playerLocation.z)
+--         end
+--         SetBlipSprite(blip, 1)
+--         ShowHeadingIndicatorOnBlip(blip, true)
+--         SetBlipRotation(blip, math.ceil(playerLocation.w))
+--         SetBlipScale(blip, 1.0)
+--         if playerJob == 'police' then
+--             SetBlipColour(blip, 38)
+--         else
+--             SetBlipColour(blip, 5)
+--         end
+--         SetBlipAsShortRange(blip, true)
+--         BeginTextCommandSetBlipName('STRING')
+--         AddTextComponentSubstringPlayerName(playerLabel)
+--         EndTextCommandSetBlipName(blip)
+--         DutyBlips[#DutyBlips + 1] = blip
+--     end
 
-    if GetBlipFromEntity(PlayerPedId()) == blip then
-        -- Ensure we remove our own blip.
-        RemoveBlip(blip)
-    end
+--     -- if GetBlipFromEntity(PlayerPedId()) == blip then
+--     --     -- Ensure we remove our own blip.
+--     --     RemoveBlip(blip)
+--     -- end
+-- end
+
+local function CreateDutyBlips(playerId, pLabel, pJob, pLocation)
+    CreateThread(function()
+        local street1, street2 = GetStreetNameAtCoord(pLocation.x, pLocation.y, pLocation.z)
+        local transG = 250
+        local blip = AddBlipForCoord(pLocation.x, pLocation.y, pLocation.z)
+        local blip2 = AddBlipForCoord(pLocation.x, pLocation.y, pLocation.z)
+        
+        SetBlipSprite(blip, 60)
+        SetBlipSprite(blip2, 161)
+        SetBlipColour(blip, 38)
+        SetBlipColour(blip2, 38)
+        SetBlipDisplay(blip, 4)
+        SetBlipDisplay(blip2, 8)
+        SetBlipAlpha(blip, transG)
+        SetBlipAlpha(blip2, transG)
+        SetBlipScale(blip, 0.8)
+        SetBlipScale(blip2, 2.0)
+        SetBlipAsShortRange(blip, false)
+        SetBlipAsShortRange(blip2, false)
+        PulseBlip(blip2)
+        BeginTextCommandSetBlipName('STRING')
+        AddTextComponentSubstringPlayerName(pLabel or '99')
+        EndTextCommandSetBlipName(blip)
+        while transG ~= 0 do
+            Wait(180 * 4)
+            transG = transG - 1
+            SetBlipAlpha(blip, transG)
+            SetBlipAlpha(blip2, transG)
+            if transG == 0 then
+                RemoveBlip(blip)
+                return
+            end
+        end
+    end)
 end
 
 -- Events
