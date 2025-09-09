@@ -39,7 +39,7 @@ local function UpdateBlips()
     for sourceStr, v in pairs(BIPPERS_ACTIVE) do
         local source = tonumber(sourceStr)
         local player = QBCore.Functions.GetPlayer(source)
-        if source and player then
+        if source and player and v.isActive == true then
             local coords = GetEntityCoords(GetPlayerPed(source))
             local heading = GetEntityHeading(GetPlayerPed(source))
             if coords and heading then
