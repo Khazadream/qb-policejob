@@ -32,46 +32,31 @@ local DutyBlips = {}
 --         DutyBlips[#DutyBlips + 1] = blip
 --     end
 
---     -- if GetBlipFromEntity(PlayerPedId()) == blip then
---     --     -- Ensure we remove our own blip.
---     --     RemoveBlip(blip)
---     -- end
+    -- if GetBlipFromEntity(PlayerPedId()) == blip then
+    --     -- Ensure we remove our own blip.
+    --     RemoveBlip(blip)
+    -- end
 -- end
 
 local function CreateDutyBlips(playerId, pLabel, pJob, pLocation)
-    CreateThread(function()
-        local street1, street2 = GetStreetNameAtCoord(pLocation.x, pLocation.y, pLocation.z)
-        local transG = 250
-        local blip = AddBlipForCoord(pLocation.x, pLocation.y, pLocation.z)
-        local blip2 = AddBlipForCoord(pLocation.x, pLocation.y, pLocation.z)
-        
-        SetBlipSprite(blip, 60)
-        SetBlipSprite(blip2, 161)
-        SetBlipColour(blip, 38)
-        SetBlipColour(blip2, 38)
-        SetBlipDisplay(blip, 4)
-        SetBlipDisplay(blip2, 8)
-        SetBlipAlpha(blip, transG)
-        SetBlipAlpha(blip2, transG)
-        SetBlipScale(blip, 0.8)
-        SetBlipScale(blip2, 2.0)
-        SetBlipAsShortRange(blip, false)
-        SetBlipAsShortRange(blip2, false)
-        PulseBlip(blip2)
-        BeginTextCommandSetBlipName('STRING')
-        AddTextComponentSubstringPlayerName(pLabel or '99')
-        EndTextCommandSetBlipName(blip)
-        while transG ~= 0 do
-            Wait(180 * 4)
-            transG = transG - 1
-            SetBlipAlpha(blip, transG)
-            SetBlipAlpha(blip2, transG)
-            if transG == 0 then
-                RemoveBlip(blip)
-                return
-            end
-        end
-    end)
+    -- local street1, street2 = GetStreetNameAtCoord(pLocation.x, pLocation.y, pLocation.z)
+    local blip = AddBlipForCoord(pLocation.x, pLocation.y, pLocation.z)
+    DutyBlips[#DutyBlips + 1] = blip
+    SetBlipSprite(blip, 1)
+    SetBlipColour(blip, 38)
+    ShowHeadingIndicatorOnBlip(blip, true)
+    SetBlipRotation(blip, math.ceil(pLocation.w))
+    -- SetBlipDisplay(blip, 4)
+    -- SetBlipAlpha(blip, 250)
+    SetBlipScale(blip, 0.8)
+    SetBlipAsShortRange(blip, false)
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentSubstringPlayerName(pLabel or '99')
+    EndTextCommandSetBlipName(blip)
+    -- if GetBlipFromEntity(PlayerPedId()) == blip then
+    --     -- Ensure we remove our own blip.
+    --     RemoveBlip(blip)
+    -- end
 end
 
 -- Events
