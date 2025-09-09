@@ -7,8 +7,9 @@ local updatingCops = false
 local function UpdateBlips()
     local trackedPlayers = {}
     local players = QBCore.Functions.GetQBPlayers()
-    for i = 1, #players do
-        local v = players[i]
+    --for i = 1, #players do
+    for _, v in ipairs(players) do
+        --local v = players[i]
         --if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
         local sourceStr = tostring(v.PlayerData.source)
         if v and BIPPERS_ACTIVE[sourceStr] and BIPPERS_ACTIVE[sourceStr].isActive then
