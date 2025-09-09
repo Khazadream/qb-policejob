@@ -7,47 +7,13 @@ PlayerJob = {}
 local DutyBlips = {}
 
 -- Functions
--- local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
---     local ped = GetPlayerPed(playerId)
---     local blip = GetBlipFromEntity(ped)
---     if not DoesBlipExist(blip) then
---         if NetworkIsPlayerActive(playerId) then
---             blip = AddBlipForEntity(ped)
---         else
---             blip = AddBlipForCoord(playerLocation.x, playerLocation.y, playerLocation.z)
---         end
---         SetBlipSprite(blip, 1)
---         ShowHeadingIndicatorOnBlip(blip, true)
---         SetBlipRotation(blip, math.ceil(playerLocation.w))
---         SetBlipScale(blip, 1.0)
---         if playerJob == 'police' then
---             SetBlipColour(blip, 38)
---         else
---             SetBlipColour(blip, 5)
---         end
---         SetBlipAsShortRange(blip, true)
---         BeginTextCommandSetBlipName('STRING')
---         AddTextComponentSubstringPlayerName(playerLabel)
---         EndTextCommandSetBlipName(blip)
---         DutyBlips[#DutyBlips + 1] = blip
---     end
-
-    -- if GetBlipFromEntity(PlayerPedId()) == blip then
-    --     -- Ensure we remove our own blip.
-    --     RemoveBlip(blip)
-    -- end
--- end
-
 local function CreateDutyBlips(playerId, pLabel, pJob, pLocation)
-    -- local street1, street2 = GetStreetNameAtCoord(pLocation.x, pLocation.y, pLocation.z)
     local blip = AddBlipForCoord(pLocation.x, pLocation.y, pLocation.z)
     DutyBlips[#DutyBlips + 1] = blip
     SetBlipSprite(blip, 1)
     SetBlipColour(blip, 38)
     ShowHeadingIndicatorOnBlip(blip, true)
     SetBlipRotation(blip, math.ceil(pLocation.w))
-    -- SetBlipDisplay(blip, 4)
-    -- SetBlipAlpha(blip, 250)
     SetBlipScale(blip, 0.8)
     SetBlipAsShortRange(blip, false)
     BeginTextCommandSetBlipName('STRING')
@@ -130,7 +96,6 @@ RegisterNetEvent('QBCore:Client:SetDuty', function(newDuty)
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    print(json.encode(JobInfo, {indent=true}))
     if JobInfo.type ~= 'leo' then
         if DutyBlips then
             for _, v in pairs(DutyBlips) do
@@ -160,8 +125,6 @@ RegisterNetEvent('police:client:sendBillingMail', function(amount)
 end)
 
 RegisterNetEvent('police:client:UpdateBlips', function(players)
-    print("PoliceJob updateBlips", json.encode(players, {indent=true}))
-    print("PoliceJob updateBlips", json.encode(PlayerJob, {indent=true}))
     if PlayerJob and (PlayerJob.type == 'leo' or PlayerJob.type == 'ems') and
         PlayerJob.onduty then
         if DutyBlips then

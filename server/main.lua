@@ -3,39 +3,9 @@ QBCore = exports['qb-core']:GetCoreObject()
 local updatingCops = false
 
 -- Functions
-
--- local function UpdateBlips()
---     local trackedPlayers = {}
---     local players = QBCore.Functions.GetQBPlayers()
---     --for i = 1, #players do
---     for _, v in ipairs(players) do
---         --local v = players[i]
---         --if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
---         local sourceStr = tostring(v.PlayerData.source)
---         if v and BIPPERS_ACTIVE[sourceStr] and BIPPERS_ACTIVE[sourceStr].isActive then
---             local coords = GetEntityCoords(GetPlayerPed(v.PlayerData.source))
---             local heading = GetEntityHeading(GetPlayerPed(v.PlayerData.source))
---             trackedPlayers[#trackedPlayers + 1] = {
---                 source = v.PlayerData.source,
---                 --label = v.PlayerData.metadata['callsign'],
---                 label = BIPPERS_ACTIVE[sourceStr].callsign or "99",
---                 --job = v.PlayerData.job.name,
---                 --job = "police",
---                 location = {
---                     x = coords.x,
---                     y = coords.y,
---                     z = coords.z,
---                     w = heading
---                 }
---             }
---         end
---     end
---     TriggerClientEvent('police:client:UpdateBlips', -1, trackedPlayers)
--- end
-
+local lastCalls = nil
 local function UpdateBlips()
     local trackedPlayers = {}
-    print('BIPPERS_ACTIVE:', json.encode(BIPPERS_ACTIVE, {indent=true}))
     for sourceStr, v in pairs(BIPPERS_ACTIVE) do
         local source = tonumber(sourceStr)
         local player = QBCore.Functions.GetPlayer(source)
@@ -58,11 +28,14 @@ local function UpdateBlips()
             end
         end
     end
+    if lastCalls == 0 and #trackedPlayers == 0 then
+        return
+    end
+    lastCalls = #trackedPlayers
     local playersOnDuty = QBCore.Functions.GetPlayersOnDuty('police')
     for _, v in pairs(playersOnDuty) do
         TriggerClientEvent('police:client:UpdateBlips', v, trackedPlayers)
     end
-    -- TriggerClientEvent('police:client:UpdateBlips', -1, trackedPlayers)
 end
 
 local function GetCurrentCops()

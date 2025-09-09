@@ -42,9 +42,6 @@ RegisterNetEvent("qb-policejob:server:toggleBipper", function(slot)
     end
     -- Activate bipper
     local bipperState = ToggleBippers(Player.PlayerData.source, item.metadata.callsign)
-    print(bipperState)
-    print(json.encode(bipperState, {indent=true}))
-    print(json.encode(BIPPERS_ACTIVE, {indent=true}))
     TriggerClientEvent("qb-policejob:client:toggleBipper", src, bipperState)
     
 end)
