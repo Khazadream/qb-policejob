@@ -11,6 +11,8 @@ local function ToggleBippers(source, callsign)
 
     BIPPERS_ACTIVE[sourceStr].isActive = not BIPPERS_ACTIVE[sourceStr].isActive
     BIPPERS_ACTIVE[sourceStr].callsign = callsign
+
+    return BIPPERS_ACTIVE[sourceStr].isActive
 end
 
 local function SetBippers(source, state)
@@ -37,20 +39,14 @@ RegisterNetEvent("qb-policejob:server:toggleBipper", function(slot)
         -- Assign callsign to the bipper
         item.metadata.callsign = callsign
         exports.ox_inventory:SetMetadata(src, slot, item.metadata)
-        -- Activate bipper
-        TriggerClientEvent("qb-policejob:client:toggleBipper", src)
-        ToggleBippers(Player.PlayerData.source, item.metadata.callsign)
-    elseif item.metadata.callsign and item.metadata.callsign == callsign then
-        -- Activate bipper par son propriétaire.
-        TriggerClientEvent("qb-policejob:client:toggleBipper", src)
-        ToggleBippers(Player.PlayerData.source, item.metadata.callsign)
-    elseif item.metadata.callsign and callsign == "NO CALLSIGN" then
-        -- Bipper is used by a non Officer Player.
-        TriggerClientEvent("qb-policejob:client:toggleBipper", src)
-        ToggleBippers(Player.PlayerData.source, item.metadata.callsign)
-    else
-        print("BIPPER: ERROR!")
     end
+    -- Activate bipper
+    local bipperState = ToggleBippers(Player.PlayerData.source, item.metadata.callsign)
+    print(bipperState)
+    print(json.encode(bipperState, {indent=true}))
+    print(json.encode(BIPPERS_ACTIVE, {indent=true}))
+    TriggerClientEvent("qb-policejob:client:toggleBipper", src, bipperState)
+    
 end)
 
 RegisterNetEvent("qb-policejob:server:setBippers", function(bipState)

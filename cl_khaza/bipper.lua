@@ -4,8 +4,8 @@ exports('leo_bipper', function(data, slot)
     TriggerServerEvent("qb-policejob:server:toggleBipper", slot)
 end)
 
-RegisterNetEvent("qb-policejob:client:toggleBipper", function()
-    bipperIsActive = not bipperIsActive
+RegisterNetEvent("qb-policejob:client:toggleBipper", function(bipperState)
+    bipperIsActive = bipperState
 
     if bipperIsActive then
         QBCore.Functions.Notify("Vous avez activé votre bipper", "primary", 2500)
