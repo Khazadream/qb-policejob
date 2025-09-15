@@ -15,6 +15,7 @@ local function RegisterOxShop()
             { name = 'empty_evidence_bag', price = 0 },
             { name = 'swatmask', price = 0 },
             { name = 'leo_bipper', price = 0 },
+            { name = 'radio', price = 0 },
             -- Weapon
             { name = "WEAPON_POCKETLIGHT", price = 0, image = 'uvtorch.png', metadata = { label = 'Lampe à UV', components = {"plight_uv" } }},
             { name = 'toolbox_weapon_analysis', price = 0 },
