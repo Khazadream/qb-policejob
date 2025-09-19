@@ -247,7 +247,6 @@ RegisterNetEvent('police:client:ApplyRope', function(data)
 end)
 
 RegisterNetEvent('police:client:CuffPlayerSoft', function(data)
-    print('police:client:CuffPlayerSoft', json.encode(data, { indent = true }))
     data = data or {}
     if not IsPedRagdoll(PlayerPedId()) then
         if data.entity and IsPedAPlayer(data.entity) then
@@ -378,8 +377,6 @@ local function ForceHandCuffsAnimation(options)
     local dpemotes = exports['rpemotes-reborn']
     local playerGender = GetEntityModel(PlayerPedId()) == `mp_m_freemode_01` and 'male' or 'female'
     local isGagged = options.isGagged or false
-    print('playerGender', playerGender)
-    print('isGagged', json.encode(options, { indent = true }))
     local emoteName = EMOTE_LIST[playerGender][isGagged and 1 or 2]
     if isHandcuffedType == 'criminal' then
         if isGagged then
@@ -396,7 +393,6 @@ local function ForceHandCuffsAnimation(options)
         end
         Wait(2000)
     end
-    print('Cancel emote')
     dpemotes:EmoteCancel()
 end
 
@@ -404,7 +400,6 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff, optio
     local ped = PlayerPedId()
     local options = options or {}
     local hasRopped = options.hasRopped or false
-    print('isHandcuffed', isHandcuffed)
     local ClearHandCuffed = function()
         isHandcuffed = false
         isEscorted = false
@@ -454,7 +449,6 @@ end)
 
 RegisterCommand('testhandcuffed', function()
     local playerId = GetPlayerServerId(PlayerId())
-    print(GetPlayerServerId(PlayerId()))
     if isHandcuffed then
         TriggerServerEvent('police:server:CuffPlayer', playerId, true, { type = 'criminal', hasRopped = true, isGagged = true })
     else

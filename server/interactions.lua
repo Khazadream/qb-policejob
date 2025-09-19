@@ -25,9 +25,7 @@ RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff, opti
     local targetPed = GetPlayerPed(playerId)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
-    print(json.encode(#(playerCoords - targetCoords), { indent = true }))
-    print(json.encode({playerPed, targetPed}, { indent = true }))
-    -- if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, 'Attempted exploit abuse') end
+    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, 'Attempted exploit abuse') end
 
     local Player = QBCore.Functions.GetPlayer(src)
     local CuffedPlayer = QBCore.Functions.GetPlayer(playerId)
