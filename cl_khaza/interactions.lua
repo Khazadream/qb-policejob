@@ -1,7 +1,7 @@
 local PlayerHandcuffs = {}
+local PlayerHandTight = {}
 
 local function InitPoliceInteraction()
-    print('InitPoliceInteraction')
     exports['qb-target']:AddGlobalPlayer({
         options = {
             {
@@ -30,9 +30,29 @@ local function InitPoliceInteraction()
                     if not PlayerHandcuffs[playerId] then
                         return false
                     end
+                    if PlayerHandTight[playerId] then
+                        return false
+                    end
                     return true
                 end,
                 job = 'police',
+            },
+            {
+                type = "client",
+                event = "police:client:CuffPlayerSoft",
+                icon = "fas fa-handcuffs",
+                label = "Retirer les serflex",
+                canInteract = function(entity)
+                    if not IsPedAPlayer(entity) then return false end
+                    local playerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(entity))
+                    if not PlayerHandcuffs[playerId] then
+                        return false
+                    end
+                    if PlayerHandTight[playerId] then
+                        return true
+                    end
+                    return false
+                end,
             },
             {
                 type = "client",
@@ -75,6 +95,10 @@ exports('handcuffs', function(data, slot)
     TriggerEvent("police:client:CuffPlayerSoft")
 end)
 
+exports('ziptie', function(data, slot)
+    TriggerEvent("police:client:CuffPlayerSoft", data.args)
+end)
+
 AddEventHandler('onResourceStart', function(resourceName)
     if GetCurrentResourceName() == resourceName then
         InitPoliceInteraction()
@@ -93,12 +117,14 @@ AddEventHandler('onResourceStop', function(resourceName)
     end
 end)
 
-RegisterNetEvent('police:client:CuffedPlayers', function(data)
+RegisterNetEvent('police:client:CuffedPlayers', function(data , data2)
     PlayerHandcuffs = data or {}
+    PlayerHandTight = data2 or {}
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     PlayerHandcuffs = {}
+    PlayerHandTight = {}
     cleanup()
 end)
 

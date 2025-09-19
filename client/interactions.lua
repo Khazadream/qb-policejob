@@ -1,5 +1,6 @@
 -- Variables
 local isEscorting = false
+local isHandcuffedType = nil
 
 -- Functions
 exports('IsHandcuffed', function()
@@ -241,7 +242,8 @@ RegisterNetEvent('police:client:KidnapPlayer', function()
     end
 end)
 
-RegisterNetEvent('police:client:CuffPlayerSoft', function()
+RegisterNetEvent('police:client:CuffPlayerSoft', function(data)
+    print(json.encode(data, { indent = true }))
     if not IsPedRagdoll(PlayerPedId()) then
         local player, distance = QBCore.Functions.GetClosestPlayer()
         if player ~= -1 and distance < 1.5 then
@@ -354,11 +356,64 @@ RegisterNetEvent('police:client:GetKidnappedDragger', function()
     end)
 end)
 
-RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
+local EMOTE_LIST = {
+    ['male'] = {'bzzz_gag2', 'bzzz_gag4'},
+    ['female'] = { 'bzzz_gag1', 'bzzz_gag3'},
+}
+
+local function ForceHandCuffsAnimation(options)
+    local dpemotes = exports['rpemotes-reborn']
+    local playerGender = GetEntityModel(PlayerPedId()) == `mp_m_freemode_01` and 'male' or 'female'
+    local isGagged = options.isGagged or false
+    print('playerGender', playerGender)
+    print('isGagged', json.encode(options, { indent = true }))
+    local emoteName = EMOTE_LIST[playerGender][isGagged and 1 or 2]
+    if isHandcuffedType == 'criminal' then
+        if isGagged then
+            TriggerServerEvent('3dme:text-action', 'est attachée et bâillonnée')
+        else
+            TriggerServerEvent('3dme:text-action', 'est attachée')
+        end
+    else
+        TriggerServerEvent('3dme:text-action', 'est menottée')
+    end
+    while isHandcuffed == true do
+        if LocalPlayer.state.currentEmote ~= emoteName then
+            dpemotes:EmoteCommandStart(emoteName)
+        end
+        Wait(2000)
+    end
+    print('Cancel emote')
+    dpemotes:EmoteCancel()
+end
+
+RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff, options)
     local ped = PlayerPedId()
-    if not isHandcuffed then
-        isHandcuffed = true
-        TriggerServerEvent('police:server:SetHandcuffStatus', true)
+    local options = options or {}
+    local hasRopped = options.hasRopped or false
+    local ClearHandCuffed = function()
+        isHandcuffed = false
+        isEscorted = false
+        TriggerEvent('hospital:client:isEscorted', isEscorted)
+        DetachEntity(ped, true, false)
+        ClearPedTasksImmediately(ped)
+        TriggerServerEvent('police:server:SetHandcuffStatus', false)
+        if isHandcuffedType == 'police' then
+            TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 1.0, 'Uncuff', 0.2)
+        elseif isHandcuffedType == 'criminal' then
+            TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 1.0, 'ziptie', 0.2)
+        end
+        QBCore.Functions.Notify(Lang:t('success.uncuffed'), 'success')
+    end
+    if isHandcuffed == true then
+        ClearHandCuffed()
+        return
+    end
+    isHandcuffed = true
+    TriggerServerEvent('police:server:SetHandcuffStatus', true)
+    if not hasRopped or hasRopped == false then
+        isHandcuffedType = 'police'
+        TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 1.0, 'Cuff', 0.2)
         ClearPedTasksImmediately(ped)
         if GetSelectedPedWeapon(ped) ~= `WEAPON_UNARMED` then
             SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true)
@@ -373,14 +428,23 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
             QBCore.Functions.Notify(Lang:t('info.cuffed_walk'), 'primary')
         end
     else
-        isHandcuffed = false
-        isEscorted = false
-        TriggerEvent('hospital:client:isEscorted', isEscorted)
-        DetachEntity(ped, true, false)
-        TriggerServerEvent('police:server:SetHandcuffStatus', false)
+        isHandcuffedType = 'criminal'
+        TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 1.0, 'ziptie', 0.2)
         ClearPedTasksImmediately(ped)
-        TriggerServerEvent('InteractSound_SV:PlayOnSource', 'Uncuff', 0.2)
-        QBCore.Functions.Notify(Lang:t('success.uncuffed'), 'success')
+        if GetSelectedPedWeapon(ped) ~= `WEAPON_UNARMED` then
+            SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true)
+        end
+        ForceHandCuffsAnimation(options)
+    end
+end)
+
+RegisterCommand('testhandcuffed', function()
+    local playerId = GetPlayerServerId(PlayerId())
+    print(GetPlayerServerId(PlayerId()))
+    if isHandcuffed then
+        TriggerServerEvent('police:server:CuffPlayer', playerId, true, { type = 'criminal', hasRopped = true, isGagged = true })
+    else
+        TriggerServerEvent('police:server:CuffPlayer', playerId, true, { type = 'criminal', hasRopped = true, isGagged = true })
     end
 end)
 
@@ -485,10 +549,11 @@ CreateThread(function()
             DisableControlAction(27, 75, true) -- Disable exit vehicle
             EnableControlAction(0, 249, true)  -- Added for talking while cuffed
             EnableControlAction(0, 46, true)   -- Added for talking while cuffed
-
-            if (not IsEntityPlayingAnim(PlayerPedId(), 'mp_arresting', 'idle', 3) and not IsEntityPlayingAnim(PlayerPedId(), 'mp_arrest_paired', 'crook_p2_back_right', 3)) and not QBCore.Functions.GetPlayerData().metadata['isdead'] then
-                loadAnimDict('mp_arresting')
-                TaskPlayAnim(PlayerPedId(), 'mp_arresting', 'idle', 8.0, -8, -1, cuffType, 0, 0, 0, 0)
+            if isHandcuffedType == 'police' then
+                if (not IsEntityPlayingAnim(PlayerPedId(), 'mp_arresting', 'idle', 3) and not IsEntityPlayingAnim(PlayerPedId(), 'mp_arrest_paired', 'crook_p2_back_right', 3)) and not QBCore.Functions.GetPlayerData().metadata['isdead'] and isHandcuffedType == 'police' then
+                    loadAnimDict('mp_arresting')
+                    TaskPlayAnim(PlayerPedId(), 'mp_arresting', 'idle', 8.0, -8, -1, cuffType, 0, 0, 0, 0)
+                end
             end
         end
         if not isHandcuffed and not isEscorted and not isEscorting then

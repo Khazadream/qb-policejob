@@ -1,4 +1,5 @@
 local PlayerHandcuffs = {}
+local PlayerHandTight = {}
 
 RegisterNetEvent('police:server:SearchPlayer', function()
     local src = source
@@ -18,27 +19,38 @@ RegisterNetEvent('police:server:SearchPlayer', function()
     end
 end)
 
-RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff)
+RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff, options)
     local src = source
     local playerPed = GetPlayerPed(src)
     local targetPed = GetPlayerPed(playerId)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, 'Attempted exploit abuse') end
+    print(json.encode(#(playerCoords - targetCoords), { indent = true }))
+    print(json.encode({playerPed, targetPed}, { indent = true }))
+    -- if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, 'Attempted exploit abuse') end
 
     local Player = QBCore.Functions.GetPlayer(src)
     local CuffedPlayer = QBCore.Functions.GetPlayer(playerId)
     if not Player or not CuffedPlayer then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
+    options = options or {}
+    if Player.PlayerData.job.type ~= 'leo' and options.type ~= 'criminal' then return end
     if not PlayerHandcuffs[playerId] then
-        if not exports.ox_inventory:RemoveItem(src, 'handcuffs', 1) then return end
+        if options.type == 'criminal' then
+            PlayerHandTight[playerId] = true
+        else
+            if not exports.ox_inventory:RemoveItem(src, 'handcuffs', 1) then return end
+        end
         PlayerHandcuffs[playerId] = true
     else
-        if not exports.ox_inventory:AddItem(src, 'handcuffs', 1) then return end
+        if PlayerHandTight[playerId] then
+            PlayerHandTight[playerId] = nil
+        else
+            if not exports.ox_inventory:AddItem(src, 'handcuffs', 1) then return end
+        end
         PlayerHandcuffs[playerId] = nil
     end
-    TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, isSoftcuff)
-    TriggerClientEvent('police:client:CuffedPlayers', -1, PlayerHandcuffs)
+    TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, isSoftcuff, options)
+    TriggerClientEvent('police:client:CuffedPlayers', -1, PlayerHandcuffs, PlayerHandTight)
     if not PlayerHandcuffs[playerId] then
         TriggerClientEvent('police:client:UnCuff', playerId)
     end
