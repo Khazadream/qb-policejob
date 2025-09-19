@@ -53,7 +53,7 @@ local function InitPoliceInteraction()
                     return false
                 end,
                 action = function(entity)
-                    TriggerEvent("police:client:CuffPlayerSoft", { type = 'criminal', hasRopped = true, isGagged = false })
+                    TriggerEvent("police:client:CuffPlayerSoft", { type = 'criminal', hasRopped = true, isGagged = false, entity = entity })
                 end
             },
             {
