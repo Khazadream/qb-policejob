@@ -44,18 +44,20 @@ RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff, opti
         PlayerHandcuffs[playerId] = true
         TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, isSoftcuff, options)
     else
+        if options.applyingRope then
+            TriggerClientEvent('QBCore:Notify', src, 'La personne est déjà attachée')
+            return
+        end
         if PlayerHandTight[playerId] then
             PlayerHandTight[playerId] = nil
         else
             if not exports.ox_inventory:AddItem(src, 'handcuffs', 1) then return end
         end
         PlayerHandcuffs[playerId] = nil
+        TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, isSoftcuff, options)
         TriggerClientEvent('police:client:UnCuff', playerId)
     end
     TriggerClientEvent('police:client:CuffedPlayers', -1, PlayerHandcuffs, PlayerHandTight)
-    -- if not PlayerHandcuffs[playerId] then
-    --     TriggerClientEvent('police:client:UnCuff', playerId)
-    -- end
 end)
 
 RegisterNetEvent('police:server:EscortPlayer', function(playerId)
