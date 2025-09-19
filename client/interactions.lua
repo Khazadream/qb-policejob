@@ -243,7 +243,7 @@ RegisterNetEvent('police:client:KidnapPlayer', function()
 end)
 
 RegisterNetEvent('police:client:ApplyRope', function(data)
-    TriggerEvent("police:client:CuffPlayerSoft", { type = 'criminal', hasRopped = true, isGagged = true, applyingRope = true })
+    TriggerEvent("police:client:CuffPlayerSoft", { type = 'criminal', hasRopped = true, isGagged = false, applyingRope = true })
 end)
 
 RegisterNetEvent('police:client:CuffPlayerSoft', function(data)
@@ -444,15 +444,6 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff, optio
             SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true)
         end
         ForceHandCuffsAnimation(options)
-    end
-end)
-
-RegisterCommand('testhandcuffed', function()
-    local playerId = GetPlayerServerId(PlayerId())
-    if isHandcuffed then
-        TriggerServerEvent('police:server:CuffPlayer', playerId, true, { type = 'criminal', hasRopped = true, isGagged = true })
-    else
-        TriggerServerEvent('police:server:CuffPlayer', playerId, true, { type = 'criminal', hasRopped = true, isGagged = true })
     end
 end)
 
