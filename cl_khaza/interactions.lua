@@ -39,8 +39,6 @@ local function InitPoliceInteraction()
             },
             {
                 type = "client",
-                event = "police:client:CuffPlayerSoft",
-                args = { type = 'criminal', hasRopped = true, isGagged = false },
                 icon = "fas fa-handcuffs",
                 label = "Retirer les serflex",
                 canInteract = function(entity)
@@ -54,6 +52,9 @@ local function InitPoliceInteraction()
                     end
                     return false
                 end,
+                action = function(entity)
+                    TriggerEvent("police:client:CuffPlayerSoft", { type = 'criminal', hasRopped = true, isGagged = false })
+                end
             },
             {
                 type = "client",

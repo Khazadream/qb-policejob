@@ -245,6 +245,14 @@ end)
 RegisterNetEvent('police:client:CuffPlayerSoft', function(data)
     print('police:client:CuffPlayerSoft', json.encode(data, { indent = true }))
     if not IsPedRagdoll(PlayerPedId()) then
+        if data.entity and IsPedAPlayer(data.entity) then
+            local playerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(data.entity))
+            if not IsPedInAnyVehicle(GetPlayerPed(playerId)) and not IsPedInAnyVehicle(PlayerPedId()) then
+                TriggerServerEvent('police:server:CuffPlayer', playerId, true, data or {})
+                HandCuffAnimation()
+                return
+            end
+        end
         local player, distance = QBCore.Functions.GetClosestPlayer()
         if player ~= -1 and distance < 1.5 then
             local playerId = GetPlayerServerId(player)
