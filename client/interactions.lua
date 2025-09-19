@@ -243,7 +243,7 @@ RegisterNetEvent('police:client:KidnapPlayer', function()
 end)
 
 RegisterNetEvent('police:client:CuffPlayerSoft', function(data)
-    print(json.encode(data, { indent = true }))
+    print('police:client:CuffPlayerSoft', json.encode(data, { indent = true }))
     if not IsPedRagdoll(PlayerPedId()) then
         local player, distance = QBCore.Functions.GetClosestPlayer()
         if player ~= -1 and distance < 1.5 then
