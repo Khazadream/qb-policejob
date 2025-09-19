@@ -244,10 +244,12 @@ end)
 
 RegisterNetEvent('police:client:CuffPlayerSoft', function(data)
     print('police:client:CuffPlayerSoft', json.encode(data, { indent = true }))
+    data = data or {}
     if not IsPedRagdoll(PlayerPedId()) then
         if data.entity and IsPedAPlayer(data.entity) then
+            print('data.entity', data.entity)
             local playerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(data.entity))
-            if not IsPedInAnyVehicle(GetPlayerPed(playerId)) and not IsPedInAnyVehicle(PlayerPedId()) then
+            if not IsPedInAnyVehicle(GetPlayerPed(data.entity)) and not IsPedInAnyVehicle(PlayerPedId()) then
                 TriggerServerEvent('police:server:CuffPlayer', playerId, true, data or {})
                 HandCuffAnimation()
                 return
