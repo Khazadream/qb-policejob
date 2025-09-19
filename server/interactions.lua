@@ -36,11 +36,13 @@ RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff, opti
     if Player.PlayerData.job.type ~= 'leo' and options.type ~= 'criminal' then return end
     if not PlayerHandcuffs[playerId] then
         if options.type == 'criminal' then
+            if not exports.ox_inventory:RemoveItem(src, 'ziptie', 1) then return end
             PlayerHandTight[playerId] = true
         else
             if not exports.ox_inventory:RemoveItem(src, 'handcuffs', 1) then return end
         end
         PlayerHandcuffs[playerId] = true
+        TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, isSoftcuff, options)
     else
         if PlayerHandTight[playerId] then
             PlayerHandTight[playerId] = nil
@@ -48,12 +50,12 @@ RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff, opti
             if not exports.ox_inventory:AddItem(src, 'handcuffs', 1) then return end
         end
         PlayerHandcuffs[playerId] = nil
-    end
-    TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, isSoftcuff, options)
-    TriggerClientEvent('police:client:CuffedPlayers', -1, PlayerHandcuffs, PlayerHandTight)
-    if not PlayerHandcuffs[playerId] then
         TriggerClientEvent('police:client:UnCuff', playerId)
     end
+    TriggerClientEvent('police:client:CuffedPlayers', -1, PlayerHandcuffs, PlayerHandTight)
+    -- if not PlayerHandcuffs[playerId] then
+    --     TriggerClientEvent('police:client:UnCuff', playerId)
+    -- end
 end)
 
 RegisterNetEvent('police:server:EscortPlayer', function(playerId)
