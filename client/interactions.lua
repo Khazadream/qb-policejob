@@ -249,7 +249,7 @@ RegisterNetEvent('police:client:CuffPlayerSoft', function(data)
         if player ~= -1 and distance < 1.5 then
             local playerId = GetPlayerServerId(player)
             if not IsPedInAnyVehicle(GetPlayerPed(player)) and not IsPedInAnyVehicle(PlayerPedId()) then
-                TriggerServerEvent('police:server:CuffPlayer', playerId, true)
+                TriggerServerEvent('police:server:CuffPlayer', playerId, true, data or {})
                 HandCuffAnimation()
             else
                 QBCore.Functions.Notify(Lang:t('error.vehicle_cuff'), 'error')
