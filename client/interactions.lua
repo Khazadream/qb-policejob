@@ -391,6 +391,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff, optio
     local ped = PlayerPedId()
     local options = options or {}
     local hasRopped = options.hasRopped or false
+    print('isHandcuffed', isHandcuffed)
     local ClearHandCuffed = function()
         isHandcuffed = false
         isEscorted = false
